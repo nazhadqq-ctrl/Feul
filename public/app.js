@@ -182,8 +182,8 @@ const C4KURD_MAP = {
     'm': 'م', 'M': 'م',
     '[': 'ژ', '{': 'ژ',
     ']': 'چ', '}': 'چ',
-    ';': 'ک', ':': 'گ',
-    '\'': 'گ', '"': 'گ',
+    ';': 'ک', ':': ':',
+    '\'': 'گ', '"': '"',
     ',': '،', '?': '؟'
 };
 
@@ -192,25 +192,130 @@ function convertToC4Kurd(str) {
     return str.split('').map(char => C4KURD_MAP[char] || char).join('');
 }
 
-// Auto-converts English typing to Kurdish C4Kurd on the fly
+// Convert any Kurdish/Arabic digits or letters in car number to English
+function normalizeToEnglishCarPlate(val) {
+    if (!val) return '';
+    const ARABIC_KURD_TO_ENG = {
+        '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
+        '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9',
+        '۰': '0', '۱': '1', '۲': '2', '۳': '3', '۴': '4',
+        '۵': '5', '۶': '6', '۷': '7', '۸': '8', '۹': '9',
+        'ق': 'Q', 'و': 'W', 'ۆ': 'W', 'ە': 'E', 'ێ': 'E',
+        'ر': 'R', 'ڕ': 'R', 'ت': 'T', 'ط': 'T', 'ی': 'Y',
+        'ى': 'Y', 'پ': 'P', 'ا': 'A', 'ئا': 'A', 'أ': 'A',
+        'إ': 'A', 'آ': 'A', 'س': 'S', 'ش': 'S', 'ص': 'S',
+        'د': 'D', 'ض': 'D', 'ذ': 'D', 'ف': 'F', 'گ': 'G',
+        'غ': 'G', 'ه': 'H', 'ح': 'H', 'ژ': 'J', 'ج': 'J',
+        'ک': 'K', 'ك': 'K', 'ل': 'L', 'ڵ': 'L', 'ز': 'Z',
+        'ظ': 'Z', 'خ': 'X', 'چ': 'C', 'ڤ': 'V', 'ب': 'B',
+        'ن': 'N', 'م': 'M', 'ء': 'A'
+    };
+    return String(val)
+        .split('')
+        .map(char => ARABIC_KURD_TO_ENG[char] || char)
+        .join('')
+        .toUpperCase();
+}
+
+// Helper to insert text at cursor position and trigger input event
+function insertTextAtCursor(input, text) {
+    const start = input.selectionStart !== null ? input.selectionStart : input.value.length;
+    const end = input.selectionEnd !== null ? input.selectionEnd : input.value.length;
+    const val = input.value;
+    input.value = val.substring(0, start) + text + val.substring(end);
+    const newPos = start + text.length;
+    input.setSelectionRange(newPos, newPos);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+// C4Kurd physical keycode map
+const C4KURD_CODE_MAP = {
+    'KeyQ': 'ق',
+    'KeyW': 'و',
+    'KeyE': 'ە',
+    'KeyR': 'ر',
+    'KeyT': 'ت',
+    'KeyY': 'ی',
+    'KeyU': 'و',
+    'KeyI': 'ی',
+    'KeyO': 'ۆ',
+    'KeyP': 'پ',
+    'KeyA': 'ا',
+    'KeyS': 'س',
+    'KeyD': 'د',
+    'KeyF': 'ف',
+    'KeyG': 'گ',
+    'KeyH': 'ه',
+    'KeyJ': 'ژ',
+    'KeyK': 'ک',
+    'KeyL': 'ل',
+    'KeyZ': 'ز',
+    'KeyX': 'خ',
+    'KeyC': 'چ',
+    'KeyV': 'ڤ',
+    'KeyB': 'ب',
+    'KeyN': 'ن',
+    'KeyM': 'م',
+    'BracketLeft': 'ژ',
+    'BracketRight': 'چ',
+    'Semicolon': 'ک',
+    'Quote': 'گ',
+    'Comma': '،'
+};
+
+const C4KURD_SHIFT_CODE_MAP = {
+    'KeyQ': 'ق',
+    'KeyW': 'ۆ',
+    'KeyE': 'ێ',
+    'KeyR': 'ڕ',
+    'KeyT': 'ط',
+    'KeyY': 'ێ',
+    'KeyU': 'وو',
+    'KeyI': 'ى',
+    'KeyO': 'ۆ',
+    'KeyP': 'پ',
+    'KeyA': 'ئا',
+    'KeyS': 'ش',
+    'KeyD': 'د',
+    'KeyF': 'ف',
+    'KeyG': 'غ',
+    'KeyH': 'ح',
+    'KeyJ': 'ج',
+    'KeyK': 'ک',
+    'KeyL': 'ڵ',
+    'KeyZ': 'ز',
+    'KeyX': 'خ',
+    'KeyC': 'ج',
+    'KeyV': 'ڤ',
+    'KeyB': 'ب',
+    'KeyN': 'ن',
+    'KeyM': 'م',
+    'Slash': '؟',
+    'Semicolon': ':',
+    'Quote': '"'
+};
+
+// Auto-converts any keyboard layout to Kurdish C4Kurd on the fly
 function enableC4KurdTyping(inputElem) {
     if (!inputElem) return;
 
-    inputElem.addEventListener('beforeinput', (e) => {
-        if (e.data && e.inputType === 'insertText') {
-            const mapped = e.data.split('').map(c => C4KURD_MAP[c] || c).join('');
-            if (mapped !== e.data) {
-                e.preventDefault();
-                const start = inputElem.selectionStart;
-                const end = inputElem.selectionEnd;
-                const val = inputElem.value;
-                inputElem.value = val.substring(0, start) + mapped + val.substring(end);
-                inputElem.selectionStart = inputElem.selectionEnd = start + mapped.length;
-                inputElem.dispatchEvent(new Event('input', { bubbles: true }));
-            }
+    inputElem.addEventListener('keydown', (e) => {
+        // Don't intercept shortcuts or navigation keys
+        if (e.ctrlKey || e.altKey || e.metaKey) return;
+        if (['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Tab', 'Enter', 'Escape', 'Home', 'End'].includes(e.key)) {
+            return;
+        }
+
+        const map = e.shiftKey ? C4KURD_SHIFT_CODE_MAP : C4KURD_CODE_MAP;
+        const mappedChar = map[e.code];
+
+        if (mappedChar !== undefined) {
+            e.preventDefault();
+            insertTextAtCursor(inputElem, mappedChar);
         }
     });
 
+    // Fallback for paste / direct input
     inputElem.addEventListener('input', () => {
         const val = inputElem.value;
         const converted = convertToC4Kurd(val);
@@ -222,13 +327,36 @@ function enableC4KurdTyping(inputElem) {
     });
 }
 
-// Auto-converts Kurdish/Arabic digits to English digits on the fly
+// Auto-converts any keyboard layout to English digits/letters on the fly
 function enableEnglishCarNumberTyping(inputElem) {
     if (!inputElem) return;
 
+    inputElem.addEventListener('keydown', (e) => {
+        if (e.ctrlKey || e.altKey || e.metaKey) return;
+        if (['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Tab', 'Enter', 'Escape', 'Home', 'End'].includes(e.key)) {
+            return;
+        }
+
+        let char = null;
+        if (e.code.startsWith('Digit')) {
+            char = e.code.replace('Digit', '');
+        } else if (e.code.startsWith('Numpad') && !isNaN(e.code.replace('Numpad', ''))) {
+            char = e.code.replace('Numpad', '');
+        } else if (e.code.startsWith('Key')) {
+            char = e.code.replace('Key', '').toUpperCase();
+        } else if (e.code === 'Space') {
+            char = ' ';
+        }
+
+        if (char !== null) {
+            e.preventDefault();
+            insertTextAtCursor(inputElem, char);
+        }
+    });
+
     inputElem.addEventListener('input', () => {
         const raw = inputElem.value;
-        const normalized = normalizeKurdishDigits(raw).toUpperCase();
+        const normalized = normalizeToEnglishCarPlate(raw);
         if (raw !== normalized) {
             const pos = inputElem.selectionStart;
             inputElem.value = normalized;
@@ -442,11 +570,12 @@ function setupEventListeners() {
     enableC4KurdTyping(parizgaInput);
     enableC4KurdTyping(bashInput);
     enableC4KurdTyping(tableSearchInput);
+    enableC4KurdTyping(loginStation);
 
     // 4. Car Plate Input: updates license plate display
     carNumberInput.addEventListener('input', () => {
         const raw = carNumberInput.value;
-        const normalized = normalizeKurdishDigits(raw).toUpperCase();
+        const normalized = normalizeToEnglishCarPlate(raw);
         platePreviewNumber.textContent = normalized.trim() || '12345';
 
         // Clear warning state if user starts typing a new car number
