@@ -130,13 +130,7 @@ app.post('/api/login', async (req, res) => {
         return res.status(400).json({ success: false, message: 'تکایە ناوی بەکارهێنەر و وشەی نهێنی بنووسە.' });
     }
 
-    const cleanPlace = station ? station.trim() : '';
-    if (!cleanPlace) {
-        return res.status(400).json({ 
-            success: false, 
-            message: 'تکایە شوێن (Place / بەنزینخانە) دیاری بکە یان بنووسە چونکە مەرجە بۆ چوونەژوورەوە.' 
-        });
-    }
+    let cleanPlace = (station && station.trim()) ? station.trim() : '';
 
     try {
         const p = await getPool();
@@ -167,6 +161,10 @@ app.post('/api/login', async (req, res) => {
                 success: false, 
                 message: 'ناوی بەکارهێنەر یان وشەی نهێنی هەڵەیە!' 
             });
+        }
+
+        if (!cleanPlace) {
+            cleanPlace = result.recordset[0].place || 'بەنزینخانەی سەرەکی';
         }
 
         // Handle Place (شوێن / بەنزینخانە) condition

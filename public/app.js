@@ -269,31 +269,33 @@ function setupEventListeners() {
         togglePassIcon.className = isPass ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
     });
 
-    // 2. Login Form Submit
-    loginForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
+    // 2. Login Form Submit & Button Click
+    async function doLogin(e) {
+        if (e) e.preventDefault();
         sounds.init();
 
         const username = loginUser.value.trim();
         const password = loginPass.value.trim();
-        const station = loginStation.value.trim();
+        const station = (loginStation.value && loginStation.value.trim()) ? loginStation.value.trim() : 'بەنزینخانەی سەرەکی';
 
-        if (!username || !password) {
+        if (!username) {
             loginAlert.classList.remove('hidden');
-            loginAlertText.textContent = 'تکایە ناوی بەکارهێنەر و وشەی نهێنی بنووسە.';
+            loginAlertText.textContent = 'تکایە ناوی بەکارهێنەر بنووسە.';
+            loginUser.focus();
             return;
         }
 
-        if (!station) {
+        if (!password) {
             loginAlert.classList.remove('hidden');
-            loginAlertText.textContent = 'تکایە شوێن (Place / بەنزینخانە) دیاری بکە یان بنووسە چونکە مەرجە بۆ چوونەژوورەوە.';
-            loginStation.focus();
+            loginAlertText.textContent = 'تکایە وشەی نهێنی بنووسە.';
+            loginPass.focus();
             return;
         }
 
         loginAlert.classList.add('hidden');
         loginBtn.disabled = true;
-        loginBtn.querySelector('.spinner').classList.remove('hidden');
+        const spinner = loginBtn.querySelector('.spinner');
+        if (spinner) spinner.classList.remove('hidden');
 
         try {
             const res = await fetch('/api/login', {
@@ -309,7 +311,7 @@ function setupEventListeners() {
                 applyUserSession(data.user);
             } else {
                 loginAlert.classList.remove('hidden');
-                loginAlertText.textContent = data.message || 'هەڵە لە چوونەژوورەوە';
+                loginAlertText.textContent = data.message || 'هەڵە لە چوونەژوورەوە: ناوی بەکارهێنەر یان وشەی نهێنی نادروستە';
                 loginPass.focus();
             }
         } catch (err) {
@@ -317,8 +319,14 @@ function setupEventListeners() {
             loginAlertText.textContent = 'نەتوانرا پەیوەندی بە سێرڤەرەوە بکرێت: ' + err.message;
         } finally {
             loginBtn.disabled = false;
-            loginBtn.querySelector('.spinner').classList.add('hidden');
+            const spinner = loginBtn.querySelector('.spinner');
+            if (spinner) spinner.classList.add('hidden');
         }
+    }
+
+    loginForm.addEventListener('submit', doLogin);
+    loginBtn.addEventListener('click', (e) => {
+        doLogin(e);
     });
 
     // 3. Logout
