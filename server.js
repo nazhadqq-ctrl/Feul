@@ -47,6 +47,18 @@ async function getPool() {
 }
 
 // Ensure FuelRecords table exists on startup
+// Helper to convert Kurdish/Arabic numbers (٠-٩ and ۰-۹) to standard digits (0-9)
+function normalizeKurdishDigits(val) {
+    if (!val) return '';
+    const map = {
+        '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
+        '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9',
+        '۰': '0', '۱': '1', '۲': '2', '۳': '3', '۴': '4',
+        '۵': '5', '۶': '6', '۷': '7', '۸': '8', '۹': '9'
+    };
+    return String(val).replace(/[٠-٩۰-۹]/g, d => map[d] || d);
+}
+
 async function initDb() {
     try {
         const p = await getPool();
@@ -223,7 +235,8 @@ app.post('/api/check-car', async (req, res) => {
     }
 
     try {
-        const eligibility = await checkCarFuelEligibility(car_no, parizga, bash, reg_date);
+        const cleanCarNo = normalizeKurdishDigits(car_no).trim().toUpperCase();
+        const eligibility = await checkCarFuelEligibility(cleanCarNo, parizga, bash, reg_date);
         res.json({ success: true, ...eligibility });
     } catch (err) {
         console.error('Check car error:', err);
@@ -242,13 +255,12 @@ app.post('/api/register-car', async (req, res) => {
         });
     }
 
-    // Validate car_no: English letters and digits only
-    const cleanCarNo = car_no.trim().toUpperCase();
-    const alphanumericRegex = /^[A-Z0-9\s]+$/;
-    if (!alphanumericRegex.test(cleanCarNo)) {
+    // Normalize Kurdish/Arabic digits to standard digits
+    const cleanCarNo = normalizeKurdishDigits(car_no).trim().toUpperCase();
+    if (!cleanCarNo) {
         return res.status(400).json({
             success: false,
-            message: 'ژمارەی ئۆتۆمبێل تەنها دەبێت ژمارە و پیتی ئینگلیزی بێت!'
+            message: 'تکایە ژمارەی ئۆتۆمبێل بنووسە.'
         });
     }
 

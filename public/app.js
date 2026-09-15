@@ -138,7 +138,6 @@ const stationNameInput = document.getElementById('stationNameInput');
 
 const submitBtn = document.getElementById('submitBtn');
 const submitSpinner = document.getElementById('submitSpinner');
-const quickCheckBtn = document.getElementById('quickCheckBtn');
 const clearBtn = document.getElementById('clearBtn');
 
 // Records Table Elements
@@ -157,21 +156,40 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
 });
 
+// Helper to normalize Kurdish/Arabic digits (٠-٩ and ۰-۹) to standard digits (0-9)
+function normalizeKurdishDigits(val) {
+    if (!val) return '';
+    const map = {
+        '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
+        '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9',
+        '۰': '0', '۱': '1', '۲': '2', '۳': '3', '۴': '4',
+        '۵': '5', '۶': '6', '۷': '7', '۸': '8', '۹': '9'
+    };
+    return String(val).replace(/[٠-٩۰-۹]/g, d => map[d] || d);
+}
+
 // Realtime Clock & Date
 function initClock() {
     function update() {
         const now = new Date();
-        const timeStr = now.toTimeString().split(' ')[0]; // HH:mm:ss
-        const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        const d = String(now.getDate()).padStart(2, '0');
+        const dateStr = `${y}-${m}-${d}`;
+
+        const h = String(now.getHours()).padStart(2, '0');
+        const min = String(now.getMinutes()).padStart(2, '0');
+        const s = String(now.getSeconds()).padStart(2, '0');
+        const timeStr = `${h}:${min}:${s}`;
 
         if (liveTimeClock) liveTimeClock.textContent = timeStr;
         if (liveDateClock) liveDateClock.textContent = dateStr;
 
-        // Also update form time if user hasn't typed a custom time
-        if (regTimeInput && !regTimeInput.dataset.manual) {
+        // Always update form time and date (disabled fields)
+        if (regTimeInput) {
             regTimeInput.value = timeStr;
         }
-        if (regDateInput && !regDateInput.dataset.manual) {
+        if (regDateInput) {
             regDateInput.value = dateStr;
         }
     }
@@ -277,21 +295,14 @@ function setupEventListeners() {
         showLogin();
     });
 
-    // 4. Strict Alphanumeric Car Plate Input (تەنها ژمارە و پیتی ئینگلیزی)
+    // 4. Car Plate Input: auto-convert Kurdish numbers, allow Kurdish & English text freely
     carNumberInput.addEventListener('input', (e) => {
-        const originalVal = carNumberInput.value;
-        // Filter out non-alphanumeric (keep A-Z, 0-9, spaces)
-        const cleanVal = originalVal.replace(/[^a-zA-Z0-9\s]/g, '').toUpperCase();
-
-        if (originalVal !== cleanVal) {
-            carNoHelper.classList.remove('hidden');
-            setTimeout(() => carNoHelper.classList.add('hidden'), 2500);
-        } else {
-            carNoHelper.classList.add('hidden');
+        const raw = carNumberInput.value;
+        const normalized = normalizeKurdishDigits(raw);
+        if (raw !== normalized) {
+            carNumberInput.value = normalized;
         }
-
-        carNumberInput.value = cleanVal;
-        platePreviewNumber.textContent = cleanVal || '12345 A';
+        platePreviewNumber.textContent = normalized.trim() || '12345';
 
         // Clear warning state if user starts typing a new car number
         if (registrationCard.classList.contains('state-blocked')) {
@@ -310,22 +321,13 @@ function setupEventListeners() {
         platePreviewCategory.textContent = bashInput.value.trim() || 'تایبەت';
     });
 
-    // Mark manual time/date if edited
-    regTimeInput.addEventListener('input', () => { regTimeInput.dataset.manual = 'true'; });
-    regDateInput.addEventListener('input', () => { regDateInput.dataset.manual = 'true'; });
-
     // 7. Form Submit (Check & Register Car)
     fuelForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         await handleRegisterCar();
     });
 
-    // 8. Quick Check Button (Without Saving)
-    quickCheckBtn.addEventListener('click', async () => {
-        await handleQuickCheck();
-    });
-
-    // 9. Clear Button (Esc)
+    // 8. Clear Button (Esc)
     clearBtn.addEventListener('click', () => {
         resetFormToNormal();
         clearInputs(true);
@@ -415,43 +417,7 @@ async function handleRegisterCar() {
     }
 }
 
-// Quick check without registering
-async function handleQuickCheck() {
-    sounds.init();
-    clearTimeout(clearTimer);
 
-    const car_no = carNumberInput.value.trim().toUpperCase();
-    const parizga = parizgaInput.value.trim();
-    const bash = bashInput.value.trim();
-    const reg_date = regDateInput.value;
-
-    if (!car_no) {
-        carNumberInput.focus();
-        return;
-    }
-
-    quickCheckBtn.disabled = true;
-
-    try {
-        const response = await fetch('/api/check-car', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ car_no, parizga, bash, reg_date })
-        });
-
-        const data = await response.json();
-
-        if (data.allowed) {
-            triggerAllowedCheckNotice(data.message);
-        } else {
-            triggerBlockedState(data);
-        }
-    } catch (err) {
-        alert('هەڵە لە پشکنین: ' + err.message);
-    } finally {
-        quickCheckBtn.disabled = false;
-    }
-}
 
 // -------------------------------------------------------------
 // UI STATES: BLOCKED (RED) & SUCCESS (GREEN)
@@ -537,24 +503,6 @@ function triggerSuccessState(message, record) {
     }, 3500);
 }
 
-function triggerAllowedCheckNotice(message) {
-    sounds.playSuccess();
-    registrationCard.className = 'glass-panel registration-card state-success';
-    stateBadgeIcon.className = 'fa-solid fa-shield-check';
-    quickStatusText.textContent = 'ئامادەیە - ڕێگەپێدراوە';
-
-    actionBanner.className = 'action-banner success';
-    actionBanner.classList.remove('hidden');
-    bannerIcon.className = 'fa-solid fa-check';
-    bannerTitle.textContent = 'ڕێگەپێدراوە';
-    bannerMessage.textContent = message;
-    bannerMeta.innerHTML = `<span class="meta-pill">ئەم ئۆتۆمبێلە لە ٧ ڕۆژدا بەنزینی نەبردووە و دەتوانرێت تۆمار بکرێت.</span>`;
-
-    clearTimer = setTimeout(() => {
-        resetFormToNormal();
-    }, 3000);
-}
-
 // Reset form appearance to neutral cyan
 function resetFormToNormal() {
     registrationCard.className = 'glass-panel registration-card state-normal';
@@ -567,7 +515,7 @@ function resetFormToNormal() {
 // Clear input fields
 function clearInputs(clearAll = false) {
     carNumberInput.value = '';
-    platePreviewNumber.textContent = '12345 A';
+    platePreviewNumber.textContent = '12345';
 
     if (clearAll) {
         parizgaInput.value = 'هەولێر';

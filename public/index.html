@@ -198,24 +198,17 @@
                                 <label for="carNumberInput">
                                     <span class="required-star">*</span>
                                     ژمارەی ئۆتۆمبێل
-                                    <span class="field-hint">(تەنها ژمارە و پیتی ئینگلیزی)</span>
                                 </label>
                                 <div class="input-with-badge">
                                     <input 
                                         type="text" 
                                         id="carNumberInput" 
                                         name="car_no" 
-                                        placeholder="بۆ نموونە: 12345 A" 
+                                        placeholder="بۆ نموونە: 12345" 
                                         autocomplete="off" 
                                         required 
                                         autofocus
-                                        dir="ltr"
-                                        class="ltr-input font-mono"
                                     >
-                                    <span class="input-badge">A-Z / 0-9</span>
-                                </div>
-                                <div id="carNoHelper" class="field-error-msg hidden">
-                                    تەنها ژمارە و پیتی ئینگلیزی ڕێگەپێدراوە!
                                 </div>
                             </div>
 
@@ -289,7 +282,7 @@
                                     بەرواری هاتن
                                 </label>
                                 <div class="input-icon-box">
-                                    <input type="date" id="regDateInput" name="reg_date" required>
+                                    <input type="text" id="regDateInput" name="reg_date" required readonly tabindex="-1" class="disabled-input">
                                     <i class="fa-solid fa-calendar-day input-icon"></i>
                                 </div>
                             </div>
@@ -301,7 +294,7 @@
                                     کاتژمێر
                                 </label>
                                 <div class="input-icon-box">
-                                    <input type="text" id="regTimeInput" name="reg_time" placeholder="HH:mm:ss" required dir="ltr" class="ltr-input font-mono">
+                                    <input type="text" id="regTimeInput" name="reg_time" placeholder="HH:mm:ss" required readonly tabindex="-1" dir="ltr" class="ltr-input font-mono disabled-input">
                                     <i class="fa-solid fa-clock input-icon"></i>
                                 </div>
                             </div>
@@ -328,10 +321,6 @@
                                 <span class="spinner hidden" id="submitSpinner"></span>
                             </button>
 
-                            <button type="button" id="quickCheckBtn" class="btn-secondary btn-lg" title="تەنها پشکنین">
-                                <i class="fa-solid fa-magnifying-glass"></i>
-                                <span>پشکنین</span>
-                            </button>
 
                             <button type="button" id="clearBtn" class="btn-outline btn-lg" title="بەتاڵکردنەوە">
                                 <i class="fa-solid fa-eraser"></i>
