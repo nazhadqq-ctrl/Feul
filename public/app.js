@@ -151,48 +151,30 @@ const printTableBtn = document.getElementById('printTableBtn');
 const recordsTableBody = document.getElementById('recordsTableBody');
 
 // ===================================================================
-// C4KURD & ENGLISH KEYBOARD AUTO-CONVERTERS (No Alt+Shift needed!)
+// ARABIC (JORDAN) C4KURD & ENGLISH DIGIT AUTO-CONVERTERS
 // ===================================================================
-const C4KURD_MAP = {
-    'q': 'ق', 'Q': 'ق',
-    'w': 'و', 'W': 'ۆ',
-    'e': 'ە', 'E': 'ێ',
-    'r': 'ر', 'R': 'ڕ',
-    't': 'ت', 'T': 'ط',
-    'y': 'ی', 'Y': 'ێ',
-    'u': 'و', 'U': 'وو',
-    'i': 'ی', 'I': 'ى',
-    'o': 'ۆ', 'O': 'ۆ',
-    'p': 'پ', 'P': 'پ',
-    'a': 'ا', 'A': 'ئا',
-    's': 'س', 'S': 'ش',
-    'd': 'د', 'D': 'د',
-    'f': 'ف', 'F': 'ف',
-    'g': 'گ', 'G': 'غ',
-    'h': 'ه', 'H': 'ح',
-    'j': 'ژ', 'J': 'ج',
-    'k': 'ک', 'K': 'ک',
-    'l': 'ل', 'L': 'ڵ',
-    'z': 'ز', 'Z': 'ز',
-    'x': 'خ', 'X': 'خ',
-    'c': 'چ', 'C': 'ج',
-    'v': 'ڤ', 'V': 'ڤ',
-    'b': 'ب', 'B': 'ب',
-    'n': 'ن', 'N': 'ن',
-    'm': 'م', 'M': 'م',
-    '[': 'ژ', '{': 'ژ',
-    ']': 'چ', '}': 'چ',
-    ';': 'ک', ':': ':',
-    '\'': 'گ', '"': '"',
-    ',': '،', '?': '؟'
-};
 
-function convertToC4Kurd(str) {
+// Normalizes Arabic characters to Kurdish Sorani Unicode (e.g. ك -> ک, ي -> ی, ة -> ە)
+function normalizeToKurdishSorani(str) {
     if (!str) return '';
-    return str.split('').map(char => C4KURD_MAP[char] || char).join('');
+    const ARABIC_TO_KURDISH_MAP = {
+        'ك': 'ک',
+        'ي': 'ی',
+        'ى': 'ی',
+        'ة': 'ە',
+        'ؤ': 'ۆ',
+        'أ': 'ئا',
+        'إ': 'ئـ',
+        'آ': 'ئا',
+        'ء': 'ئـ'
+    };
+    return String(str)
+        .split('')
+        .map(char => ARABIC_TO_KURDISH_MAP[char] || char)
+        .join('');
 }
 
-// Convert any Kurdish/Arabic digits or letters in car number to English
+// Convert any Kurdish/Arabic digits or letters in car number to English (0-9, A-Z)
 function normalizeToEnglishCarPlate(val) {
     if (!val) return '';
     const ARABIC_KURD_TO_ENG = {
@@ -202,13 +184,13 @@ function normalizeToEnglishCarPlate(val) {
         '۵': '5', '۶': '6', '۷': '7', '۸': '8', '۹': '9',
         'ق': 'Q', 'و': 'W', 'ۆ': 'W', 'ە': 'E', 'ێ': 'E',
         'ر': 'R', 'ڕ': 'R', 'ت': 'T', 'ط': 'T', 'ی': 'Y',
-        'ى': 'Y', 'پ': 'P', 'ا': 'A', 'ئا': 'A', 'أ': 'A',
+        'ي': 'Y', 'ى': 'Y', 'پ': 'P', 'ا': 'A', 'ئا': 'A', 'أ': 'A',
         'إ': 'A', 'آ': 'A', 'س': 'S', 'ش': 'S', 'ص': 'S',
         'د': 'D', 'ض': 'D', 'ذ': 'D', 'ف': 'F', 'گ': 'G',
         'غ': 'G', 'ه': 'H', 'ح': 'H', 'ژ': 'J', 'ج': 'J',
         'ک': 'K', 'ك': 'K', 'ل': 'L', 'ڵ': 'L', 'ز': 'Z',
         'ظ': 'Z', 'خ': 'X', 'چ': 'C', 'ڤ': 'V', 'ب': 'B',
-        'ن': 'N', 'م': 'M', 'ء': 'A'
+        'ن': 'N', 'م': 'M', 'ء': 'A', 'ة': 'E'
     };
     return String(val)
         .split('')
@@ -228,97 +210,14 @@ function insertTextAtCursor(input, text) {
     input.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
-// C4Kurd physical keycode map
-const C4KURD_CODE_MAP = {
-    'KeyQ': 'ق',
-    'KeyW': 'و',
-    'KeyE': 'ە',
-    'KeyR': 'ر',
-    'KeyT': 'ت',
-    'KeyY': 'ی',
-    'KeyU': 'و',
-    'KeyI': 'ی',
-    'KeyO': 'ۆ',
-    'KeyP': 'پ',
-    'KeyA': 'ا',
-    'KeyS': 'س',
-    'KeyD': 'د',
-    'KeyF': 'ف',
-    'KeyG': 'گ',
-    'KeyH': 'ه',
-    'KeyJ': 'ژ',
-    'KeyK': 'ک',
-    'KeyL': 'ل',
-    'KeyZ': 'ز',
-    'KeyX': 'خ',
-    'KeyC': 'چ',
-    'KeyV': 'ڤ',
-    'KeyB': 'ب',
-    'KeyN': 'ن',
-    'KeyM': 'م',
-    'BracketLeft': 'ژ',
-    'BracketRight': 'چ',
-    'Semicolon': 'ک',
-    'Quote': 'گ',
-    'Comma': '،'
-};
-
-const C4KURD_SHIFT_CODE_MAP = {
-    'KeyQ': 'ق',
-    'KeyW': 'ۆ',
-    'KeyE': 'ێ',
-    'KeyR': 'ڕ',
-    'KeyT': 'ط',
-    'KeyY': 'ێ',
-    'KeyU': 'وو',
-    'KeyI': 'ى',
-    'KeyO': 'ۆ',
-    'KeyP': 'پ',
-    'KeyA': 'ئا',
-    'KeyS': 'ش',
-    'KeyD': 'د',
-    'KeyF': 'ف',
-    'KeyG': 'غ',
-    'KeyH': 'ح',
-    'KeyJ': 'ج',
-    'KeyK': 'ک',
-    'KeyL': 'ڵ',
-    'KeyZ': 'ز',
-    'KeyX': 'خ',
-    'KeyC': 'ج',
-    'KeyV': 'ڤ',
-    'KeyB': 'ب',
-    'KeyN': 'ن',
-    'KeyM': 'م',
-    'Slash': '؟',
-    'Semicolon': ':',
-    'Quote': '"'
-};
-
-// Auto-converts any keyboard layout to Kurdish C4Kurd on the fly
+// Enables seamless Arabic (Jordan) C4Kurd typing without layout conflict
 function enableC4KurdTyping(inputElem) {
     if (!inputElem) return;
 
-    inputElem.addEventListener('keydown', (e) => {
-        // Don't intercept shortcuts or navigation keys
-        if (e.ctrlKey || e.altKey || e.metaKey) return;
-        if (['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Tab', 'Enter', 'Escape', 'Home', 'End'].includes(e.key)) {
-            return;
-        }
-
-        const map = e.shiftKey ? C4KURD_SHIFT_CODE_MAP : C4KURD_CODE_MAP;
-        const mappedChar = map[e.code];
-
-        if (mappedChar !== undefined) {
-            e.preventDefault();
-            insertTextAtCursor(inputElem, mappedChar);
-        }
-    });
-
-    // Fallback for paste / direct input
+    // Normalizes input to Kurdish Sorani characters on the fly (ك -> ک, ي -> ی, ة -> ە)
     inputElem.addEventListener('input', () => {
         const val = inputElem.value;
-        const converted = convertToC4Kurd(val);
+        const converted = normalizeToKurdishSorani(val);
         if (val !== converted) {
             const pos = inputElem.selectionStart;
             inputElem.value = converted;
@@ -327,7 +226,7 @@ function enableC4KurdTyping(inputElem) {
     });
 }
 
-// Auto-converts any keyboard layout to English digits/letters on the fly
+// Auto-converts any keyboard layout (Arabic Jordan C4Kurd / English) to English digits/letters
 function enableEnglishCarNumberTyping(inputElem) {
     if (!inputElem) return;
 
