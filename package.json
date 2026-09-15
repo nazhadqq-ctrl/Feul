@@ -2,15 +2,18 @@
   "name": "feul-station-app",
   "version": "1.0.0",
   "description": "سیستەمی مۆدێرنی تۆمارکردنی بەنزینی ئۆتۆمبێل بۆ وێستگەکانی سووتەمەنی",
-  "main": "server.js",
+  "main": "main.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "desktop": "electron .",
+    "setup-shortcut": "powershell -ExecutionPolicy Bypass -File .\\Setup-Desktop-Shortcut.ps1"
   },
   "keywords": [
     "fuel",
     "station",
     "car-registration",
-    "sql-server"
+    "sql-server",
+    "desktop-app"
   ],
   "author": "Nazhad",
   "license": "ISC",
