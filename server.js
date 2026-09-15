@@ -59,6 +59,21 @@ function normalizeKurdishDigits(val) {
     return String(val).replace(/[٠-٩۰-۹]/g, d => map[d] || d);
 }
 
+function normalizeKurdishText(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/[\u200c\u200d\u200e\u200f\u00a0]/g, '')
+        .replace(/\u0647\b/g, '\u06d5')
+        .replace(/\u0647(?=[\u0631\u062f\u0632\u0698\u0648\u0646\u0645\u0644\u06a9\u06af\u0628\u067e\u062a\u0686\u062c\u0643])/g, '\u06d5')
+        .replace(/ك/g, 'ک')
+        .replace(/ي/g, 'ی')
+        .replace(/ى/g, 'ی')
+        .replace(/ة/g, 'ە')
+        .replace(/ؤ/g, 'ۆ')
+        .trim()
+        .toLowerCase();
+}
+
 async function initDb() {
     try {
         const p = await getPool();
@@ -110,8 +125,18 @@ app.get('/api/places', async (req, res) => {
         const set = new Set();
         set.add('سان');
         set.add('سەرکۆ');
-        r1.recordset.forEach(row => set.add(row.place.trim()));
-        r2.recordset.forEach(row => set.add(row.station_name.trim()));
+        r1.recordset.forEach(row => {
+            const norm = normalizeKurdishText(row.place);
+            if (norm === 'سەرکۆ') set.add('سەرکۆ');
+            else if (norm === 'سان') set.add('سان');
+            else if (row.place && row.place.trim()) set.add(row.place.trim());
+        });
+        r2.recordset.forEach(row => {
+            const norm = normalizeKurdishText(row.station_name);
+            if (norm === 'سەرکۆ') set.add('سەرکۆ');
+            else if (norm === 'سان') set.add('سان');
+            else if (row.station_name && row.station_name.trim()) set.add(row.station_name.trim());
+        });
 
         res.json({ success: true, places: Array.from(set) });
     } catch (err) {
@@ -164,10 +189,12 @@ app.post('/api/login', async (req, res) => {
             cleanPlace = result.recordset[0].place || 'بەنزینخانەی سەرەکی';
         }
 
+        const normCleanPlace = normalizeKurdishText(cleanPlace);
+
         // Handle Place (شوێن / بەنزینخانە) condition
         // If multiple users exist with the same name across different places, pick the matching one
         let matchedUser = result.recordset.find(u => 
-            u.place && u.place.trim().toLowerCase() === cleanPlace.toLowerCase()
+            u.place && normalizeKurdishText(u.place) === normCleanPlace
         );
 
         if (!matchedUser) {
@@ -176,7 +203,7 @@ app.post('/api/login', async (req, res) => {
         }
 
         if (!matchedUser) {
-            const assigned = result.recordset[0].place;
+            const assigned = result.recordset[0].place ? result.recordset[0].place.trim() : '';
             return res.status(403).json({
                 success: false,
                 message: `ئەم هەژمارە تایبەتە بە شوێنی (${assigned}) و ناتوانێت بچێتە (${cleanPlace})!`
