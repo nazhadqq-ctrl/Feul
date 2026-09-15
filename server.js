@@ -100,7 +100,29 @@ app.get('/api/health', async (req, res) => {
     }
 });
 
-// Login Route (validates against USERS table)
+// Get available places / stations list
+app.get('/api/places', async (req, res) => {
+    try {
+        const p = await getPool();
+        const r1 = await p.request().query("SELECT DISTINCT place FROM [USERS] WHERE place IS NOT NULL AND LTRIM(RTRIM(place)) <> ''");
+        const r2 = await p.request().query("SELECT DISTINCT station_name FROM [FuelRecords] WHERE station_name IS NOT NULL AND LTRIM(RTRIM(station_name)) <> ''");
+
+        const set = new Set();
+        r1.recordset.forEach(row => set.add(row.place.trim()));
+        r2.recordset.forEach(row => set.add(row.station_name.trim()));
+
+        // Add common station defaults if empty
+        if (set.size === 0) {
+            set.add('بەنزینخانەی سەرەکی');
+        }
+
+        res.json({ success: true, places: Array.from(set) });
+    } catch (err) {
+        res.json({ success: true, places: ['بەنزینخانەی سەرەکی'] });
+    }
+});
+
+// Login Route (validates against USERS table with place condition)
 app.post('/api/login', async (req, res) => {
     const { username, password, station } = req.body;
 
@@ -108,16 +130,35 @@ app.post('/api/login', async (req, res) => {
         return res.status(400).json({ success: false, message: 'تکایە ناوی بەکارهێنەر و وشەی نهێنی بنووسە.' });
     }
 
+    const cleanPlace = station ? station.trim() : '';
+    if (!cleanPlace) {
+        return res.status(400).json({ 
+            success: false, 
+            message: 'تکایە شوێن (Place / بەنزینخانە) دیاری بکە یان بنووسە چونکە مەرجە بۆ چوونەژوورەوە.' 
+        });
+    }
+
     try {
         const p = await getPool();
         const request = p.request();
-        request.input('user', sql.NVarChar, username.trim());
-        request.input('pass', sql.NVarChar, password.trim());
+        const cleanUser = username.trim();
+        const rawPass = password.trim();
+        const normPass = normalizeKurdishDigits(rawPass);
 
+        request.input('user', sql.NVarChar, cleanUser);
+        request.input('rawPass', sql.NVarChar, rawPass);
+        request.input('normPass', sql.NVarChar, normPass);
+
+        // Match user by name and password (or permetion) with trim & case insensitivity
         const query = `
-            SELECT id, User_, permetion, on_off, place 
+            SELECT id, User_, permetion, on_off, place, password 
             FROM [USERS] 
-            WHERE User_ = @user AND password = @pass
+            WHERE LOWER(LTRIM(RTRIM(User_))) = LOWER(@user)
+              AND (
+                  LTRIM(RTRIM(password)) = @rawPass
+                  OR LTRIM(RTRIM(password)) = @normPass
+                  OR (password IS NULL AND (LTRIM(RTRIM(permetion)) = @rawPass OR LTRIM(RTRIM(permetion)) = @normPass))
+              )
         `;
         const result = await request.query(query);
 
@@ -128,7 +169,26 @@ app.post('/api/login', async (req, res) => {
             });
         }
 
-        const user = result.recordset[0];
+        // Handle Place (شوێن / بەنزینخانە) condition
+        // If multiple users exist with the same name across different places, pick the matching one
+        let matchedUser = result.recordset.find(u => 
+            u.place && u.place.trim().toLowerCase() === cleanPlace.toLowerCase()
+        );
+
+        if (!matchedUser) {
+            // Find global user where place is NULL or empty
+            matchedUser = result.recordset.find(u => !u.place || u.place.trim() === '');
+        }
+
+        if (!matchedUser) {
+            const assigned = result.recordset[0].place;
+            return res.status(403).json({
+                success: false,
+                message: `ئەم هەژمارە تایبەتە بە شوێنی (${assigned}) و ناتوانێت بچێتە (${cleanPlace})!`
+            });
+        }
+
+        const user = matchedUser;
 
         // Check if account is active (on_off)
         if (user.on_off && user.on_off.toLowerCase() !== 'yes' && user.on_off !== '1' && user.on_off.toLowerCase() !== 'on') {
@@ -138,16 +198,14 @@ app.post('/api/login', async (req, res) => {
             });
         }
 
-        const selectedStation = station && station.trim() ? station.trim() : (user.place || 'بەنزینخانەی سەرەکی');
-
         res.json({
             success: true,
             user: {
                 id: user.id,
                 username: user.User_,
                 permission: user.permetion,
-                place: user.place,
-                station: selectedStation
+                place: cleanPlace,
+                station: cleanPlace
             },
             message: 'چوونەژوورەوە سەرکەوتوو بوو'
         });

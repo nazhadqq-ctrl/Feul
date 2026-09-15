@@ -152,9 +152,26 @@ const recordsTableBody = document.getElementById('recordsTableBody');
 // ===================================================================
 document.addEventListener('DOMContentLoaded', () => {
     initClock();
+    loadPlacesList();
     checkSavedSession();
     setupEventListeners();
 });
+
+// Load distinct places from server to datalist
+async function loadPlacesList() {
+    try {
+        const res = await fetch('/api/places');
+        const data = await res.json();
+        if (data.success && data.places && data.places.length > 0) {
+            const dl = document.getElementById('stationList');
+            if (dl) {
+                dl.innerHTML = data.places.map(p => `<option value="${escapeHtml(p)}">`).join('');
+            }
+        }
+    } catch (e) {
+        console.error('Error loading places:', e);
+    }
+}
 
 // Helper to normalize Kurdish/Arabic digits (٠-٩ and ۰-۹) to standard digits (0-9)
 function normalizeKurdishDigits(val) {
@@ -226,10 +243,15 @@ function applyUserSession(user) {
     loginScreen.classList.remove('active');
     mainDashboard.classList.remove('hidden');
 
+    const placeName = user.station || user.place || 'بەنزینخانە';
     navUsername.textContent = user.username || 'کارمەند';
     navUserRole.textContent = user.permission ? `بەکارهێنەر` : 'بەکارهێنەر';
-    navStationTitle.textContent = user.station || 'بەنزینخانەی سەرەکی';
-    stationNameInput.value = user.station || 'بەنزینخانەی سەرەکی';
+    navStationTitle.textContent = placeName;
+    
+    // Station is strictly controlled by login place
+    stationNameInput.value = placeName;
+    stationNameInput.readOnly = true;
+    stationNameInput.classList.add('disabled-input');
 
     loadTodayRecords();
     resetFormToNormal();
@@ -256,7 +278,18 @@ function setupEventListeners() {
         const password = loginPass.value.trim();
         const station = loginStation.value.trim();
 
-        if (!username || !password) return;
+        if (!username || !password) {
+            loginAlert.classList.remove('hidden');
+            loginAlertText.textContent = 'تکایە ناوی بەکارهێنەر و وشەی نهێنی بنووسە.';
+            return;
+        }
+
+        if (!station) {
+            loginAlert.classList.remove('hidden');
+            loginAlertText.textContent = 'تکایە شوێن (Place / بەنزینخانە) دیاری بکە یان بنووسە چونکە مەرجە بۆ چوونەژوورەوە.';
+            loginStation.focus();
+            return;
+        }
 
         loginAlert.classList.add('hidden');
         loginBtn.disabled = true;
