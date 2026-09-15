@@ -1,0 +1,22 @@
+{
+  "name": "feul-station-app",
+  "version": "1.0.0",
+  "description": "سیستەمی مۆدێرنی تۆمارکردنی بەنزینی ئۆتۆمبێل بۆ وێستگەکانی سووتەمەنی",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "fuel",
+    "station",
+    "car-registration",
+    "sql-server"
+  ],
+  "author": "Nazhad",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^4.22.3",
+    "mssql": "^11.0.2"
+  }
+}
