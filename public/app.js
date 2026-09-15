@@ -309,16 +309,31 @@ function setupEventListeners() {
             clearTimeout(clearTimer);
             resetFormToNormal();
         }
+        scheduleAutoCheck();
     });
+    carNumberInput.addEventListener('change', scheduleAutoCheck);
+    carNumberInput.addEventListener('blur', scheduleAutoCheck);
 
-    // 5. Combobox Province preview update
+    // 5. Combobox Province preview update & auto check
     parizgaInput.addEventListener('input', () => {
         platePreviewProvince.textContent = parizgaInput.value.trim() || 'هەولێر';
+        lastCheckedSig = '';
+        scheduleAutoCheck();
+    });
+    parizgaInput.addEventListener('change', () => {
+        lastCheckedSig = '';
+        scheduleAutoCheck();
     });
 
-    // 6. Combobox Section preview update
+    // 6. Combobox Section preview update & auto check
     bashInput.addEventListener('input', () => {
         platePreviewCategory.textContent = bashInput.value.trim() || 'تایبەت';
+        lastCheckedSig = '';
+        scheduleAutoCheck();
+    });
+    bashInput.addEventListener('change', () => {
+        lastCheckedSig = '';
+        scheduleAutoCheck();
     });
 
     // 7. Form Submit (Check & Register Car)
@@ -366,8 +381,9 @@ function setupEventListeners() {
 async function handleRegisterCar() {
     sounds.init();
     clearTimeout(clearTimer);
+    clearTimeout(autoCheckTimer);
 
-    const car_no = carNumberInput.value.trim().toUpperCase();
+    const car_no = normalizeKurdishDigits(carNumberInput.value).trim().toUpperCase();
     const parizga = parizgaInput.value.trim();
     const bash = bashInput.value.trim();
     const reg_date = regDateInput.value;
@@ -415,9 +431,71 @@ async function handleRegisterCar() {
         submitBtn.disabled = false;
         submitSpinner.classList.add('hidden');
     }
+// -------------------------------------------------------------
+// REALTIME AUTOMATIC CHECK EVENT (ژمارەی ئۆتۆمبێل + پارێزگا + بەش)
+// -------------------------------------------------------------
+let autoCheckTimer = null;
+let lastCheckedSig = '';
+
+function scheduleAutoCheck() {
+    clearTimeout(autoCheckTimer);
+    autoCheckTimer = setTimeout(runAutoCheck, 350);
 }
 
+async function runAutoCheck() {
+    const car_no = normalizeKurdishDigits(carNumberInput.value).trim().toUpperCase();
+    const parizga = parizgaInput.value.trim();
+    const bash = bashInput.value.trim();
+    const reg_date = regDateInput.value;
 
+    // Trigger only when all 3 fields are filled in
+    if (!car_no || !parizga || !bash) {
+        return;
+    }
+
+    const currentSig = `${car_no}:::${parizga}:::${bash}`;
+    if (currentSig === lastCheckedSig) {
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/check-car', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ car_no, parizga, bash, reg_date })
+        });
+
+        const data = await response.json();
+        lastCheckedSig = currentSig;
+
+        if (data.allowed) {
+            triggerAllowedNotice(data.message, car_no, parizga, bash);
+        } else {
+            triggerBlockedState(data);
+        }
+    } catch (err) {
+        console.error('Auto check error:', err);
+    }
+}
+
+function triggerAllowedNotice(message, car_no, parizga, bash) {
+    if (registrationCard.classList.contains('state-blocked')) return;
+
+    registrationCard.className = 'glass-panel registration-card state-success';
+    stateBadgeIcon.className = 'fa-solid fa-circle-check';
+    quickStatusText.textContent = `ڕێگەپێدراوە بۆ بەشی ${bash}`;
+
+    actionBanner.className = 'action-banner success';
+    actionBanner.classList.remove('hidden');
+    bannerIcon.className = 'fa-solid fa-circle-check';
+    bannerTitle.textContent = `ڕێگەپێدراوە: ئۆتۆمبێلی (${car_no}) بۆ بەشی (${bash})`;
+    bannerMessage.textContent = `ئەم ئۆتۆمبێلە لە بەشی (${bash}) لەم ٧ ڕۆژەدا بەنزینی وەرنەگرتووە و دەتوانرێت تۆمار بکرێت.`;
+    bannerMeta.innerHTML = `
+        <span class="meta-pill"><i class="fa-solid fa-location-dot"></i> پارێزگا: ${parizga}</span>
+        <span class="meta-pill"><i class="fa-solid fa-layer-group"></i> بەش: ${bash}</span>
+        <span class="meta-pill" style="background: rgba(16, 185, 129, 0.3);"><i class="fa-solid fa-bolt"></i> ئامادەیە بۆ خەزنکردن (Enter)</span>
+    `;
+}
 
 // -------------------------------------------------------------
 // UI STATES: BLOCKED (RED) & SUCCESS (GREEN)
@@ -510,20 +588,20 @@ function resetFormToNormal() {
     quickStatusText.textContent = 'ئامادەیە بۆ تۆمار';
     actionBanner.classList.add('hidden');
     bannerMeta.innerHTML = '';
+    lastCheckedSig = '';
 }
 
 // Clear input fields
 function clearInputs(clearAll = false) {
     carNumberInput.value = '';
     platePreviewNumber.textContent = '12345';
+    lastCheckedSig = '';
 
     if (clearAll) {
         parizgaInput.value = 'هەولێر';
         platePreviewProvince.textContent = 'هەولێر';
         bashInput.value = 'تایبەت';
         platePreviewCategory.textContent = 'تایبەت';
-        delete regTimeInput.dataset.manual;
-        delete regDateInput.dataset.manual;
     }
 }
 

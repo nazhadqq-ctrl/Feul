@@ -212,7 +212,7 @@ async function checkCarFuelEligibility(car_no, parizga, bash, check_date) {
                 ...lastRecord,
                 reg_date_str: regDateFormatted
             },
-            message: `ئەم ئۆتۆمبێلە لە بەرواری (${regDateFormatted}) کاتژمێر (${lastRecord.reg_time}) لە وێستگەی (${lastRecord.station_name}) بەنزینی وەرگرتووە! لە هەفتەیەکدا تەنها یەک جار مافی وەرگرتنی هەیە. ماوەی (${Math.max(1, daysRemaining)}) ڕۆژی ماوە (لە بەرواری ${nextAllowedFormatted} بۆی هەیە وەربگرێتەوە).`
+            message: `ئەم ئۆتۆمبێلە (${cleanCarNo} - ${cleanParizga} - بەشی ${cleanBash}) لە بەرواری (${regDateFormatted}) کاتژمێر (${lastRecord.reg_time}) لە وێستگەی (${lastRecord.station_name}) بەنزینی وەرگرتووە! ماوەی (${Math.max(1, daysRemaining)}) ڕۆژی ماوە (لە بەرواری ${nextAllowedFormatted} بۆی هەیە وەربگرێتەوە).`
         };
     }
 
