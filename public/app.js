@@ -209,7 +209,7 @@ function applyUserSession(user) {
     mainDashboard.classList.remove('hidden');
 
     navUsername.textContent = user.username || 'کارمەند';
-    navUserRole.textContent = user.permission ? `دەسەڵات: ${user.permission}` : 'سەرپەرشتیار';
+    navUserRole.textContent = user.permission ? `بەکارهێنەر` : 'بەکارهێنەر';
     navStationTitle.textContent = user.station || 'بەنزینخانەی سەرەکی';
     stationNameInput.value = user.station || 'بەنزینخانەی سەرەکی';
 
@@ -474,22 +474,22 @@ function triggerBlockedState(data) {
     registrationCard.className = 'glass-panel registration-card state-blocked';
     stateBadgeIcon.className = 'fa-solid fa-ban';
     quickStatusChip.className = 'quick-status-chip';
-    quickStatusText.textContent = 'ڕێگەنەدراو (پێشتر بەنزینی بردووە!)';
+    quickStatusText.textContent = 'ڕێگەپێنەدراو - پێشتر بەنزینی بردووە';
 
     // 3. Build Action Banner
     actionBanner.className = 'action-banner blocked';
     actionBanner.classList.remove('hidden');
     bannerIcon.className = 'fa-solid fa-triangle-exclamation';
-    bannerTitle.textContent = 'ئاگاداری مەترسی: ئەم ئۆتۆمبێلە پێشتر بەنزینی وەرگرتووە!';
-    bannerMessage.textContent = data.message || 'لە ماوەی ٧ ڕۆژی ڕابردوودا ئەم ئۆتۆمبێلە بەنزینی وەرگرتووە و ناتوانێت دووبارە وەربگرێت.';
+    bannerTitle.textContent = 'ئاگاداری: ئەم ئۆتۆمبێلە پێشتر بەنزینی وەرگرتووە!';
+    bannerMessage.textContent = data.message || 'لە ماوەی ٧ ڕۆژدا ئەم ئۆتۆمبێلە بەنزینی وەرگرتووە و ناتوانێت دووبارە وەربگرێت.';
 
     // Meta details pills
     const rec = data.record || {};
     bannerMeta.innerHTML = `
-        <span class="meta-pill"><i class="fa-solid fa-calendar"></i> بەرواری وەرگرتن: ${rec.reg_date_str || rec.reg_date || 'نادیار'}</span>
-        <span class="meta-pill"><i class="fa-solid fa-clock"></i> کاتژمێر: ${rec.reg_time || 'نادیار'}</span>
-        <span class="meta-pill"><i class="fa-solid fa-gas-pump"></i> وێستگە: ${rec.station_name || 'نادیار'}</span>
-        <span class="meta-pill" style="background: rgba(239, 68, 68, 0.4);"><i class="fa-solid fa-hourglass-half"></i> ماوەی ڕێگەپێدان: ${data.daysRemaining || 'چەند'} ڕۆژی تر (لە ${data.nextAllowedDate || ''})</span>
+        <span class="meta-pill"><i class="fa-solid fa-calendar"></i> بەروار: ${rec.reg_date_str || rec.reg_date || '-'}</span>
+        <span class="meta-pill"><i class="fa-solid fa-clock"></i> کات: ${rec.reg_time || '-'}</span>
+        <span class="meta-pill"><i class="fa-solid fa-gas-pump"></i> بەنزینخانە: ${rec.station_name || '-'}</span>
+        <span class="meta-pill" style="background: rgba(239, 68, 68, 0.4);"><i class="fa-solid fa-hourglass-half"></i> ${data.daysRemaining || '٧'} ڕۆژ ماوە (${data.nextAllowedDate || ''})</span>
     `;
 
     // 4. Automatic clearing ("و تۆمارهكه بهتال ببێتهوه بۆ تۆماری نوێ ئهكتیڤ ببیتهوه")
@@ -510,19 +510,19 @@ function triggerSuccessState(message, record) {
 
     registrationCard.className = 'glass-panel registration-card state-success';
     stateBadgeIcon.className = 'fa-solid fa-circle-check';
-    quickStatusText.textContent = 'بە سەرکەوتوویی تۆمار کرا';
+    quickStatusText.textContent = 'سەرکەوتوو - تۆمار کرا';
 
     actionBanner.className = 'action-banner success';
     actionBanner.classList.remove('hidden');
     bannerIcon.className = 'fa-solid fa-circle-check';
-    bannerTitle.textContent = 'سەرکەوتوو بوو: ئۆتۆمبێل بە سەرکەوتوویی تۆمار کرا!';
+    bannerTitle.textContent = 'سەرکەوتوو: ئۆتۆمبێل تۆمار کرا!';
     bannerMessage.textContent = message;
 
     bannerMeta.innerHTML = `
-        <span class="meta-pill"><i class="fa-solid fa-hashtag"></i> ژمارەی ئۆتۆمبێل: ${record.car_no}</span>
+        <span class="meta-pill"><i class="fa-solid fa-hashtag"></i> ژمارە: ${record.car_no}</span>
         <span class="meta-pill"><i class="fa-solid fa-location-dot"></i> پارێزگا: ${record.parizga}</span>
         <span class="meta-pill"><i class="fa-solid fa-layer-group"></i> بەش: ${record.bash}</span>
-        <span class="meta-pill"><i class="fa-solid fa-clock"></i> کاتی تۆمار: ${record.reg_time}</span>
+        <span class="meta-pill"><i class="fa-solid fa-clock"></i> کات: ${record.reg_time}</span>
     `;
 
     // Add to table
@@ -541,14 +541,14 @@ function triggerAllowedCheckNotice(message) {
     sounds.playSuccess();
     registrationCard.className = 'glass-panel registration-card state-success';
     stateBadgeIcon.className = 'fa-solid fa-shield-check';
-    quickStatusText.textContent = 'ئامادەیە بۆ وەرگرتن';
+    quickStatusText.textContent = 'ئامادەیە - ڕێگەپێدراوە';
 
     actionBanner.className = 'action-banner success';
     actionBanner.classList.remove('hidden');
     bannerIcon.className = 'fa-solid fa-check';
-    bannerTitle.textContent = 'ئەنجامی پشکنین: ڕێگەپێدراوە';
+    bannerTitle.textContent = 'ڕێگەپێدراوە';
     bannerMessage.textContent = message;
-    bannerMeta.innerHTML = `<span class="meta-pill">ئەم ئۆتۆمبێلە لە ٧ ڕۆژی ڕابردوودا بەنزینی وەرنەگرتووە و دەتوانرێت تۆمار بکرێت.</span>`;
+    bannerMeta.innerHTML = `<span class="meta-pill">ئەم ئۆتۆمبێلە لە ٧ ڕۆژدا بەنزینی نەبردووە و دەتوانرێت تۆمار بکرێت.</span>`;
 
     clearTimer = setTimeout(() => {
         resetFormToNormal();
@@ -559,7 +559,7 @@ function triggerAllowedCheckNotice(message) {
 function resetFormToNormal() {
     registrationCard.className = 'glass-panel registration-card state-normal';
     stateBadgeIcon.className = 'fa-solid fa-shield-check';
-    quickStatusText.textContent = 'ئامادەیە بۆ تۆماری نوێ';
+    quickStatusText.textContent = 'ئامادەیە بۆ تۆمار';
     actionBanner.classList.add('hidden');
     bannerMeta.innerHTML = '';
 }
@@ -594,7 +594,7 @@ async function loadTodayRecords() {
             todayRecords = data.records || [];
             renderRecordsTable(todayRecords);
             const total = (data.stats && data.stats.total_today) ? data.stats.total_today : todayRecords.length;
-            todayCountBadge.textContent = `کۆی گشتی: ${total} ئۆتۆمبێل`;
+            todayCountBadge.textContent = `کۆی گشتی: ${total}`;
         }
     } catch (err) {
         console.error('Error loading today records:', err);
@@ -610,7 +610,7 @@ function renderRecordsTable(records) {
                 <td colspan="9">
                     <div class="empty-state">
                         <i class="fa-solid fa-inbox"></i>
-                        <p>هیچ تۆمارێک بۆ ئەمڕۆ نەدۆزرایەوە</p>
+                        <p>هیچ تۆمارێک نەدۆزرایەوە</p>
                     </div>
                 </td>
             </tr>

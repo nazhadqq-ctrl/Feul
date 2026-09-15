@@ -4,7 +4,7 @@
    =================================================================== */
 
 :root {
-    --font-primary: 'Cairo', 'Vazirmatn', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-primary: 'Noto Sans Arabic', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
 
     /* Color Palette */

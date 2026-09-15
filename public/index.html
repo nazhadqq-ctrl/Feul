@@ -3,24 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سیستەمی تۆمارکردنی بەنزینخانە - Feul Station Pro</title>
-    <!-- Google Fonts: Cairo & Vazirmatn -->
+    <title>سیستەمی تۆمارکردنی بەنزینخانە - Feul Station</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Vazirmatn:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-    <!-- FontAwesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-    <!-- Background Decorative Elements -->
     <div class="bg-glow bg-glow-1"></div>
     <div class="bg-glow bg-glow-2"></div>
-    <div class="bg-particles" id="particles"></div>
 
     <!-- ============================================== -->
-    <!-- 1. LOGIN SCREEN (فۆرمی یەکەم: چوونەژوورەوە)    -->
+    <!-- فۆرمی یەکەم: چوونەژوورەوە (Login)              -->
     <!-- ============================================== -->
     <div id="loginScreen" class="screen-container active">
         <div class="login-wrapper">
@@ -30,7 +26,7 @@
                         <i class="fa-solid fa-gas-pump"></i>
                     </div>
                     <h1>سیستەمی بەنزینخانە</h1>
-                    <p class="subtitle">تۆمارکردن و بەڕێوەبردنی پێدانی سووتەمەنی هەفتانە</p>
+                    <p class="subtitle">تۆمارکردن و بەڕێوەبردنی پێدانی سووتەمەنی</p>
                     <div class="db-status-pill">
                         <span class="status-dot"></span>
                         <span>SQL Server: 62.201.232.190 (Feul)</span>
@@ -52,11 +48,11 @@
                     <div class="form-group">
                         <label for="loginPass">
                             <i class="fa-solid fa-lock"></i>
-                            وشەی نهێنی (Password)
+                            وشەی نهێنی
                         </label>
                         <div class="input-icon-box">
                             <input type="password" id="loginPass" placeholder="وشەی نهێنی بنووسە" required autocomplete="current-password">
-                            <button type="button" id="togglePassBtn" class="toggle-pass-btn" title="پیشاندان/شاردنەوەی وشەی نهێنی">
+                            <button type="button" id="togglePassBtn" class="toggle-pass-btn" title="پیشاندان">
                                 <i class="fa-solid fa-eye" id="togglePassIcon"></i>
                             </button>
                         </div>
@@ -65,15 +61,15 @@
                     <div class="form-group">
                         <label for="loginStation">
                             <i class="fa-solid fa-location-dot"></i>
-                            ناوی بەنزینخانە / وێستگە
+                            ناوی بەنزینخانە
                         </label>
                         <div class="input-icon-box">
-                            <input type="text" id="loginStation" list="stationList" placeholder="ناوی بەنزینخانەکە دیاری بکە یان بنووسە" value="بەنزینخانەی سەرەکی">
+                            <input type="text" id="loginStation" list="stationList" placeholder="ناوی بەنزینخانەکە بنووسە" value="بەنزینخانەی سەرەکی">
                             <datalist id="stationList">
                                 <option value="بەنزینخانەی سەرەکی">
                                 <option value="بەنزینخانەی کوردستان">
                                 <option value="بەنزینخانەی هێمن">
-                                <option value="بەنزینخانەی ئەربیل">
+                                <option value="بەنزینخانەی هەولێر">
                                 <option value="بەنزینخانەی سلێمانی">
                                 <option value="بەنزینخانەی دهۆک">
                                 <option value="بەنزینخانەی کەرکووک">
@@ -89,36 +85,34 @@
                     </div>
 
                     <button type="submit" id="loginBtn" class="btn-primary btn-block">
-                        <span class="btn-text">چوونەژوورەوە بۆ سیستەم</span>
+                        <span class="btn-text">چوونەژوورەوە</span>
                         <i class="fa-solid fa-arrow-left"></i>
                         <span class="spinner hidden"></span>
                     </button>
                 </form>
 
                 <div class="login-footer">
-                    <span>پەیوەستکراوە بە خشتەی USERS لە Microsoft SQL Server</span>
+                    <span>پەیوەندی بە خشتەی USERS لە SQL Server</span>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- ============================================== -->
-    <!-- 2. MAIN REGISTRATION DASHBOARD (فۆرمی دووەم)    -->
+    <!-- فۆرمی دووەم: داشبۆردی تۆمارکردن                 -->
     <!-- ============================================== -->
     <div id="mainDashboard" class="screen-container hidden">
-        <!-- Top Navbar -->
         <header class="top-navbar">
             <div class="nav-brand">
                 <div class="brand-icon">
                     <i class="fa-solid fa-gas-pump"></i>
                 </div>
                 <div class="brand-info">
-                    <h2>سیستەمی تۆمارکردنی بەنزینخانە</h2>
+                    <h2>تۆمارکردنی بەنزین</h2>
                     <span id="navStationTitle" class="station-tag">بەنزینخانەی سەرەکی</span>
                 </div>
             </div>
 
-            <!-- Live Clock & Server Ping -->
             <div class="nav-center">
                 <div class="live-clock-pill">
                     <i class="fa-regular fa-clock"></i>
@@ -129,7 +123,6 @@
                 </div>
             </div>
 
-            <!-- User Info & Logout -->
             <div class="nav-user-actions">
                 <div class="user-pill">
                     <div class="avatar-circle">
@@ -137,22 +130,18 @@
                     </div>
                     <div class="user-meta">
                         <span id="navUsername" class="user-name">Admin</span>
-                        <span id="navUserRole" class="user-role">سەرپەرشتیار</span>
+                        <span id="navUserRole" class="user-role">بەکارهێنەر</span>
                     </div>
                 </div>
-                <button id="logoutBtn" class="btn-logout" title="دەرچوون لە هەژمار">
+                <button id="logoutBtn" class="btn-logout" title="دەرچوون">
                     <i class="fa-solid fa-right-from-bracket"></i>
                     <span>دەرچوون</span>
                 </button>
             </div>
         </header>
 
-        <!-- Main Body -->
         <main class="dashboard-main">
-            <!-- Left/Top Section: REGISTRATION FORM -->
             <section class="registration-section">
-                
-                <!-- Main Form Card (Dynamic Red/Green Glow Container) -->
                 <div id="registrationCard" class="glass-panel registration-card state-normal">
                     
                     <div class="card-top-bar">
@@ -161,18 +150,18 @@
                                 <i class="fa-solid fa-shield-check" id="stateBadgeIcon"></i>
                             </div>
                             <div>
-                                <h3>فۆرمی پشکنین و تۆمارکردنی ئۆتۆمبێل</h3>
-                                <p class="card-desc">مەرجی یاسایی: ئۆتۆمبێل لە هەفتەیەکدا تەنها یەک جار مافی وەرگرتنی هەیە (٧ ڕۆژ)</p>
+                                <h3>فۆرمی تۆمارکردنی ئۆتۆمبێل</h3>
+                                <p class="card-desc">لە هەفتەیەکدا تەنها یەک جار مافی وەرگرتنی بەنزینی هەیە (٧ ڕۆژ)</p>
                             </div>
                         </div>
 
                         <div class="quick-status-chip" id="quickStatusChip">
                             <span class="chip-dot"></span>
-                            <span id="quickStatusText">ئامادەیە بۆ تۆماری نوێ</span>
+                            <span id="quickStatusText">ئامادەیە بۆ تۆمار</span>
                         </div>
                     </div>
 
-                    <!-- Visual License Plate Preview Widget -->
+                    <!-- پلاکی ئۆتۆمبێل -->
                     <div class="plate-preview-wrapper">
                         <div class="car-license-plate" id="plateVisual">
                             <div class="plate-side-iraq">
@@ -188,25 +177,23 @@
                         </div>
                     </div>
 
-                    <!-- DYNAMIC BANNER: Blocked Warning Banner (Red) or Success Banner (Green) -->
+                    <!-- بانەری ئاگاداری -->
                     <div id="actionBanner" class="action-banner hidden">
                         <div class="banner-icon-box">
                             <i id="bannerIcon" class="fa-solid fa-triangle-exclamation"></i>
                         </div>
                         <div class="banner-content">
-                            <h4 id="bannerTitle">ئاگاداری: پێشتر بەنزینی وەرگرتووە!</h4>
-                            <p id="bannerMessage">ئەم ئۆتۆمبێلە لە بەرواری (2026-09-12) بەنزینی وەرگرتووە و ٤ ڕۆژی ماوە تا دوبارە وەربگرێتەوە.</p>
-                            <div id="bannerMeta" class="banner-meta-pills">
-                                <!-- Dynamic pills inserted via JS -->
-                            </div>
+                            <h4 id="bannerTitle"></h4>
+                            <p id="bannerMessage"></p>
+                            <div id="bannerMeta" class="banner-meta-pills"></div>
                         </div>
                     </div>
 
-                    <!-- THE REGISTRATION FORM -->
+                    <!-- فۆرمی تۆمارکردن -->
                     <form id="fuelForm" class="fuel-form">
                         <div class="form-grid">
 
-                            <!-- 1. ژمارەی ئوتومبێل (Only Digits & English Letters) -->
+                            <!-- ١. ژمارەی ئۆتۆمبێل -->
                             <div class="form-field car-number-field">
                                 <label for="carNumberInput">
                                     <span class="required-star">*</span>
@@ -218,7 +205,7 @@
                                         type="text" 
                                         id="carNumberInput" 
                                         name="car_no" 
-                                        placeholder="بۆ نموونە: 12345 A یان 89320" 
+                                        placeholder="بۆ نموونە: 12345 A" 
                                         autocomplete="off" 
                                         required 
                                         autofocus
@@ -232,7 +219,7 @@
                                 </div>
                             </div>
 
-                            <!-- 2. پارێزگا (Combobox: Selection & Custom Text) -->
+                            <!-- ٢. پارێزگا -->
                             <div class="form-field">
                                 <label for="parizgaInput">
                                     <span class="required-star">*</span>
@@ -245,7 +232,7 @@
                                         id="parizgaInput" 
                                         name="parizga" 
                                         list="parizgaList" 
-                                        placeholder="پارێزگا هەڵبژێرە یان بنووسە" 
+                                        placeholder="پارێزگا هەڵبژێرە" 
                                         value="هەولێر" 
                                         required
                                     >
@@ -264,11 +251,11 @@
                                 </div>
                             </div>
 
-                            <!-- 3. بەش (Combobox: Selection & Custom Text) -->
+                            <!-- ٣. بەش -->
                             <div class="form-field">
                                 <label for="bashInput">
                                     <span class="required-star">*</span>
-                                    بەش (جۆری بەکارهێنان)
+                                    بەش
                                     <span class="field-hint">(هەڵبژاردن یان نووسین)</span>
                                 </label>
                                 <div class="combobox-wrapper">
@@ -277,7 +264,7 @@
                                         id="bashInput" 
                                         name="bash" 
                                         list="bashList" 
-                                        placeholder="بەش هەڵبژێرە یان بنووسە" 
+                                        placeholder="بەش هەڵبژێرە" 
                                         value="تایبەت" 
                                         required
                                     >
@@ -295,7 +282,7 @@
                                 </div>
                             </div>
 
-                            <!-- 4. بەرواری هاتن (Date) -->
+                            <!-- ٤. بەروار -->
                             <div class="form-field">
                                 <label for="regDateInput">
                                     <span class="required-star">*</span>
@@ -307,11 +294,11 @@
                                 </div>
                             </div>
 
-                            <!-- 5. کاتژمێر (Time) -->
+                            <!-- ٥. کاتژمێر -->
                             <div class="form-field">
                                 <label for="regTimeInput">
                                     <span class="required-star">*</span>
-                                    کاتژمێر (کاتی هاتن)
+                                    کاتژمێر
                                 </label>
                                 <div class="input-icon-box">
                                     <input type="text" id="regTimeInput" name="reg_time" placeholder="HH:mm:ss" required dir="ltr" class="ltr-input font-mono">
@@ -319,7 +306,7 @@
                                 </div>
                             </div>
 
-                            <!-- 6. ناوی بەنزینخانە (Station Name) -->
+                            <!-- ٦. ناوی بەنزینخانە -->
                             <div class="form-field">
                                 <label for="stationNameInput">
                                     <span class="required-star">*</span>
@@ -333,59 +320,57 @@
 
                         </div>
 
-                        <!-- Action Buttons Row -->
+                        <!-- دوگمەکان -->
                         <div class="form-actions">
                             <button type="submit" id="submitBtn" class="btn-primary btn-lg">
                                 <i class="fa-solid fa-check-double"></i>
-                                <span>پشکنین و تۆمارکردن (Enter)</span>
+                                <span>تۆمارکردن</span>
                                 <span class="spinner hidden" id="submitSpinner"></span>
                             </button>
 
-                            <button type="button" id="quickCheckBtn" class="btn-secondary btn-lg" title="تەنها پشکنین بکە بەبێ سەیڤکردن">
+                            <button type="button" id="quickCheckBtn" class="btn-secondary btn-lg" title="تەنها پشکنین">
                                 <i class="fa-solid fa-magnifying-glass"></i>
-                                <span>تەنها پشکنین (Check)</span>
+                                <span>پشکنین</span>
                             </button>
 
-                            <button type="button" id="clearBtn" class="btn-outline btn-lg" title="سڕینەوە و بەتاڵکردنی فۆرمەکە (Esc)">
+                            <button type="button" id="clearBtn" class="btn-outline btn-lg" title="بەتاڵکردنەوە">
                                 <i class="fa-solid fa-eraser"></i>
-                                <span>بەتاڵکردنەوە (Esc)</span>
+                                <span>بەتاڵکردنەوە</span>
                             </button>
                         </div>
                     </form>
 
                 </div>
-
             </section>
 
-            <!-- Bottom Section: TODAY'S LOGS & STATS -->
+            <!-- خشتەی تۆمارکراوەکانی ئەمڕۆ -->
             <section class="records-section">
                 <div class="glass-panel records-card">
                     <div class="records-header">
                         <div class="header-left">
                             <div class="records-title">
                                 <i class="fa-solid fa-table-list"></i>
-                                <h3>تۆمارکراوەکانی ئەمڕۆ لەم وێستگەیە</h3>
+                                <h3>تۆمارکراوەکانی ئەمڕۆ</h3>
                             </div>
-                            <span class="records-count-badge" id="todayCountBadge">کۆی گشتی: 0 ئۆتۆمبێل</span>
+                            <span class="records-count-badge" id="todayCountBadge">کۆی گشتی: 0</span>
                         </div>
 
                         <div class="header-right">
                             <div class="search-box">
                                 <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                                <input type="text" id="tableSearchInput" placeholder="گەڕان بەپێی ژمارە یان پارێزگا...">
+                                <input type="text" id="tableSearchInput" placeholder="گەڕان...">
                             </div>
 
-                            <button id="refreshTableBtn" class="btn-icon" title="نوێکردنەوەی خشتە">
+                            <button id="refreshTableBtn" class="btn-icon" title="نوێکردنەوە">
                                 <i class="fa-solid fa-rotate"></i>
                             </button>
 
-                            <button id="printTableBtn" class="btn-icon" title="چاپکردنی ڕاپۆرتی ڕۆژانە">
+                            <button id="printTableBtn" class="btn-icon" title="چاپکردن">
                                 <i class="fa-solid fa-print"></i>
                             </button>
                         </div>
                     </div>
 
-                    <!-- Records Table -->
                     <div class="table-responsive">
                         <table class="styled-table" id="recordsTable">
                             <thead>
@@ -396,7 +381,7 @@
                                     <th>بەش</th>
                                     <th>بەروار</th>
                                     <th>کاتژمێر</th>
-                                    <th>ناوی بەنزینخانە</th>
+                                    <th>بەنزینخانە</th>
                                     <th>تۆمارکەر</th>
                                     <th>دۆخ</th>
                                 </tr>
@@ -406,7 +391,7 @@
                                     <td colspan="9">
                                         <div class="empty-state">
                                             <i class="fa-solid fa-inbox"></i>
-                                            <p>هیچ تۆمارێک بۆ ئەمڕۆ نەدۆزرایەوە</p>
+                                            <p>هیچ تۆمارێک نەدۆزرایەوە</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -418,7 +403,6 @@
         </main>
     </div>
 
-    <!-- Web Audio API Synthesizer Script & Application Logic -->
     <script src="app.js"></script>
 </body>
 </html>
