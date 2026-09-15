@@ -132,13 +132,16 @@ const carNumberInput = document.getElementById('carNumberInput');
 const carNoHelper = document.getElementById('carNoHelper');
 const parizgaInput = document.getElementById('parizgaInput');
 const bashInput = document.getElementById('bashInput');
-const regDateInput = document.getElementById('regDateInput');
-const regTimeInput = document.getElementById('regTimeInput');
-const stationNameInput = document.getElementById('stationNameInput');
 
 const submitBtn = document.getElementById('submitBtn');
 const submitSpinner = document.getElementById('submitSpinner');
 const clearBtn = document.getElementById('clearBtn');
+
+// Card Header Info Elements
+const cardTopStation = document.getElementById('cardTopStation');
+const cardTopUser = document.getElementById('cardTopUser');
+const cardTopDate = document.getElementById('cardTopDate');
+const cardTopTime = document.getElementById('cardTopTime');
 
 // Records Table Elements
 const todayCountBadge = document.getElementById('todayCountBadge');
@@ -146,6 +149,93 @@ const tableSearchInput = document.getElementById('tableSearchInput');
 const refreshTableBtn = document.getElementById('refreshTableBtn');
 const printTableBtn = document.getElementById('printTableBtn');
 const recordsTableBody = document.getElementById('recordsTableBody');
+
+// ===================================================================
+// C4KURD & ENGLISH KEYBOARD AUTO-CONVERTERS (No Alt+Shift needed!)
+// ===================================================================
+const C4KURD_MAP = {
+    'q': 'ق', 'Q': 'ق',
+    'w': 'و', 'W': 'ۆ',
+    'e': 'ە', 'E': 'ێ',
+    'r': 'ر', 'R': 'ڕ',
+    't': 'ت', 'T': 'ط',
+    'y': 'ی', 'Y': 'ێ',
+    'u': 'و', 'U': 'وو',
+    'i': 'ی', 'I': 'ى',
+    'o': 'ۆ', 'O': 'ۆ',
+    'p': 'پ', 'P': 'پ',
+    'a': 'ا', 'A': 'ئا',
+    's': 'س', 'S': 'ش',
+    'd': 'د', 'D': 'د',
+    'f': 'ف', 'F': 'ف',
+    'g': 'گ', 'G': 'غ',
+    'h': 'ه', 'H': 'ح',
+    'j': 'ژ', 'J': 'ج',
+    'k': 'ک', 'K': 'ک',
+    'l': 'ل', 'L': 'ڵ',
+    'z': 'ز', 'Z': 'ز',
+    'x': 'خ', 'X': 'خ',
+    'c': 'چ', 'C': 'ج',
+    'v': 'ڤ', 'V': 'ڤ',
+    'b': 'ب', 'B': 'ب',
+    'n': 'ن', 'N': 'ن',
+    'm': 'م', 'M': 'م',
+    '[': 'ژ', '{': 'ژ',
+    ']': 'چ', '}': 'چ',
+    ';': 'ک', ':': 'گ',
+    '\'': 'گ', '"': 'گ',
+    ',': '،', '?': '؟'
+};
+
+function convertToC4Kurd(str) {
+    if (!str) return '';
+    return str.split('').map(char => C4KURD_MAP[char] || char).join('');
+}
+
+// Auto-converts English typing to Kurdish C4Kurd on the fly
+function enableC4KurdTyping(inputElem) {
+    if (!inputElem) return;
+
+    inputElem.addEventListener('beforeinput', (e) => {
+        if (e.data && e.inputType === 'insertText') {
+            const mapped = e.data.split('').map(c => C4KURD_MAP[c] || c).join('');
+            if (mapped !== e.data) {
+                e.preventDefault();
+                const start = inputElem.selectionStart;
+                const end = inputElem.selectionEnd;
+                const val = inputElem.value;
+                inputElem.value = val.substring(0, start) + mapped + val.substring(end);
+                inputElem.selectionStart = inputElem.selectionEnd = start + mapped.length;
+                inputElem.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        }
+    });
+
+    inputElem.addEventListener('input', () => {
+        const val = inputElem.value;
+        const converted = convertToC4Kurd(val);
+        if (val !== converted) {
+            const pos = inputElem.selectionStart;
+            inputElem.value = converted;
+            if (pos !== null) inputElem.setSelectionRange(pos, pos);
+        }
+    });
+}
+
+// Auto-converts Kurdish/Arabic digits to English digits on the fly
+function enableEnglishCarNumberTyping(inputElem) {
+    if (!inputElem) return;
+
+    inputElem.addEventListener('input', () => {
+        const raw = inputElem.value;
+        const normalized = normalizeKurdishDigits(raw).toUpperCase();
+        if (raw !== normalized) {
+            const pos = inputElem.selectionStart;
+            inputElem.value = normalized;
+            if (pos !== null) inputElem.setSelectionRange(pos, pos);
+        }
+    });
+}
 
 // ===================================================================
 // INITIALIZATION
@@ -162,14 +252,17 @@ async function loadPlacesList() {
     try {
         const res = await fetch('/api/places');
         const data = await res.json();
-        if (data.success && data.places && data.places.length > 0) {
-            const dl = document.getElementById('stationList');
-            if (dl) {
-                dl.innerHTML = data.places.map(p => `<option value="${escapeHtml(p)}">`).join('');
-            }
+        const dl = document.getElementById('stationList');
+        if (dl) {
+            const list = (data.success && data.places && data.places.length > 0) ? data.places : ['سان', 'سەرکۆ'];
+            if (!list.includes('سان')) list.unshift('سان');
+            if (!list.includes('سەرکۆ')) list.splice(1, 0, 'سەرکۆ');
+            dl.innerHTML = list.map(p => `<option value="${escapeHtml(p)}">`).join('');
         }
     } catch (e) {
         console.error('Error loading places:', e);
+        const dl = document.getElementById('stationList');
+        if (dl) dl.innerHTML = '<option value="سان"><option value="سەرکۆ">';
     }
 }
 
@@ -202,13 +295,10 @@ function initClock() {
         if (liveTimeClock) liveTimeClock.textContent = timeStr;
         if (liveDateClock) liveDateClock.textContent = dateStr;
 
-        // Always update form time and date (disabled fields)
-        if (regTimeInput) {
-            regTimeInput.value = timeStr;
-        }
-        if (regDateInput) {
-            regDateInput.value = dateStr;
-        }
+        const cardTopDate = document.getElementById('cardTopDate');
+        const cardTopTime = document.getElementById('cardTopTime');
+        if (cardTopDate) cardTopDate.textContent = dateStr;
+        if (cardTopTime) cardTopTime.textContent = timeStr;
     }
     update();
     setInterval(update, 1000);
@@ -243,20 +333,20 @@ function applyUserSession(user) {
     loginScreen.classList.remove('active');
     mainDashboard.classList.remove('hidden');
 
-    const placeName = user.station || user.place || 'بەنزینخانە';
+    const placeName = user.station || user.place || 'سان';
     navUsername.textContent = user.username || 'کارمەند';
     navUserRole.textContent = user.permission ? `بەکارهێنەر` : 'بەکارهێنەر';
     navStationTitle.textContent = placeName;
     
-    // Station is strictly controlled by login place
-    stationNameInput.value = placeName;
-    stationNameInput.readOnly = true;
-    stationNameInput.classList.add('disabled-input');
+    const cardTopStation = document.getElementById('cardTopStation');
+    const cardTopUser = document.getElementById('cardTopUser');
+    if (cardTopStation) cardTopStation.textContent = placeName;
+    if (cardTopUser) cardTopUser.textContent = user.username || 'کارمەند';
 
     loadTodayRecords();
     resetFormToNormal();
     clearInputs(true);
-    setTimeout(() => carNumberInput.focus(), 250);
+    setTimeout(() => carNumberInput && carNumberInput.focus(), 250);
 }
 
 // ===================================================================
@@ -347,13 +437,16 @@ function setupEventListeners() {
         } catch (e) {}
     }
 
-    // 4. Car Plate Input: auto-convert Kurdish numbers, allow Kurdish & English text freely
+    // Attach C4Kurd and English converters
+    enableEnglishCarNumberTyping(carNumberInput);
+    enableC4KurdTyping(parizgaInput);
+    enableC4KurdTyping(bashInput);
+    enableC4KurdTyping(tableSearchInput);
+
+    // 4. Car Plate Input: updates license plate display
     carNumberInput.addEventListener('input', () => {
         const raw = carNumberInput.value;
-        const normalized = normalizeKurdishDigits(raw);
-        if (raw !== normalized) {
-            carNumberInput.value = normalized;
-        }
+        const normalized = normalizeKurdishDigits(raw).toUpperCase();
         platePreviewNumber.textContent = normalized.trim() || '12345';
 
         // Clear warning state if user starts typing a new car number
@@ -407,15 +500,8 @@ function setupEventListeners() {
         platePreviewCategory.textContent = bashInput.value.trim() || '-';
     });
 
-    // When Section is picked from list and all 3 are filled -> Check & Register!
     bashInput.addEventListener('change', () => {
         platePreviewCategory.textContent = bashInput.value.trim() || '-';
-        const car = normalizeKurdishDigits(carNumberInput.value).trim();
-        const par = parizgaInput.value.trim();
-        const bsh = bashInput.value.trim();
-        if (car && par && bsh) {
-            handleRegisterCar();
-        }
     });
 
     // Enter / Tab on Section -> Trigger Check & Register!
@@ -494,14 +580,24 @@ function setupEventListeners() {
 async function handleRegisterCar() {
     sounds.init();
     clearTimeout(clearTimer);
-    clearTimeout(autoCheckTimer);
 
     const car_no = normalizeKurdishDigits(carNumberInput.value).trim().toUpperCase();
     const parizga = parizgaInput.value.trim();
     const bash = bashInput.value.trim();
-    const reg_date = regDateInput.value;
-    const reg_time = regTimeInput.value;
-    const station_name = stationNameInput.value.trim() || (currentUser && currentUser.station) || 'بەنزینخانە';
+    
+    // Live Date & Time automatically generated
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    const reg_date = `${y}-${m}-${d}`;
+
+    const h = String(now.getHours()).padStart(2, '0');
+    const min = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    const reg_time = `${h}:${min}:${s}`;
+
+    const station_name = (currentUser && (currentUser.station || currentUser.place)) || 'سان';
     const created_by = currentUser ? currentUser.username : 'سەرپەرشتیار';
 
     if (!car_no) {
@@ -510,18 +606,18 @@ async function handleRegisterCar() {
     }
     if (!parizga) {
         parizgaInput.focus();
-        try { parizgaInput.showPicker(); } catch (e) {}
+        openPickerSafely(parizgaInput);
         return;
     }
     if (!bash) {
         bashInput.focus();
-        try { bashInput.showPicker(); } catch (e) {}
+        openPickerSafely(bashInput);
         return;
     }
 
     // Set Loading State
     submitBtn.disabled = true;
-    submitSpinner.classList.remove('hidden');
+    if (submitSpinner) submitSpinner.classList.remove('hidden');
 
     try {
         const response = await fetch('/api/register-car', {
@@ -552,7 +648,7 @@ async function handleRegisterCar() {
         alert('هەڵە لە تۆمارکردن: ' + err.message);
     } finally {
         submitBtn.disabled = false;
-        submitSpinner.classList.add('hidden');
+        if (submitSpinner) submitSpinner.classList.add('hidden');
     }
 }
 

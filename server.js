@@ -108,17 +108,14 @@ app.get('/api/places', async (req, res) => {
         const r2 = await p.request().query("SELECT DISTINCT station_name FROM [FuelRecords] WHERE station_name IS NOT NULL AND LTRIM(RTRIM(station_name)) <> ''");
 
         const set = new Set();
+        set.add('سان');
+        set.add('سەرکۆ');
         r1.recordset.forEach(row => set.add(row.place.trim()));
         r2.recordset.forEach(row => set.add(row.station_name.trim()));
 
-        // Add common station defaults if empty
-        if (set.size === 0) {
-            set.add('بەنزینخانەی سەرەکی');
-        }
-
         res.json({ success: true, places: Array.from(set) });
     } catch (err) {
-        res.json({ success: true, places: ['بەنزینخانەی سەرەکی'] });
+        res.json({ success: true, places: ['سان', 'سەرکۆ'] });
     }
 });
 

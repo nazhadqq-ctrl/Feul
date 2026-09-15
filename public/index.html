@@ -64,13 +64,21 @@
                             شوێن / بەنزینخانە (Place)
                             <span class="required-star">*</span>
                         </label>
-                        <div class="input-icon-box">
-                            <input type="text" id="loginStation" list="stationList" placeholder="شوێن / بەنزینخانە دیاری بکە یان بنووسە" value="بەنزینخانەی سەرەکی" autocomplete="off">
+                        <div class="combobox-wrapper">
+                            <input 
+                                type="text" 
+                                id="loginStation" 
+                                list="stationList" 
+                                placeholder="ناوی بەنزینخانە دیاری بکە یان بنووسە" 
+                                value="سان" 
+                                autocomplete="off"
+                                required
+                            >
                             <datalist id="stationList">
-                                <option value="بەنزینخانەی سەرەکی">
-                                <option value="kk">
+                                <option value="سان">
+                                <option value="سەرکۆ">
                             </datalist>
-                            <i class="fa-solid fa-oil-well input-icon"></i>
+                            <i class="fa-solid fa-chevron-down combo-arrow"></i>
                         </div>
                     </div>
 
@@ -146,7 +154,12 @@
                             </div>
                             <div>
                                 <h3>فۆرمی تۆمارکردنی ئۆتۆمبێل</h3>
-                                <p class="card-desc">لە هەفتەیەکدا تەنها یەک جار مافی وەرگرتنی بەنزینی هەیە (٧ ڕۆژ)</p>
+                                <div class="header-stat-row">
+                                    <span class="header-stat-pill"><i class="fa-solid fa-gas-pump"></i> بەنزینخانەی: <strong id="cardTopStation">سان</strong></span>
+                                    <span class="header-stat-pill"><i class="fa-solid fa-user-check"></i> کارمەند: <strong id="cardTopUser">Admin</strong></span>
+                                    <span class="header-stat-pill"><i class="fa-regular fa-calendar"></i> بەروار: <strong id="cardTopDate">2026-09-15</strong></span>
+                                    <span class="header-stat-pill"><i class="fa-regular fa-clock"></i> کات: <strong id="cardTopTime">00:00:00</strong></span>
+                                </div>
                             </div>
                         </div>
 
@@ -184,9 +197,9 @@
                         </div>
                     </div>
 
-                    <!-- فۆرمی تۆمارکردن -->
+                    <!-- فۆرمی تۆمارکردن (یەک ڕیز) -->
                     <form id="fuelForm" class="fuel-form">
-                        <div class="form-grid">
+                        <div class="form-single-row">
 
                             <!-- ١. ژمارەی ئۆتۆمبێل -->
                             <div class="form-field car-number-field">
@@ -199,10 +212,12 @@
                                         type="text" 
                                         id="carNumberInput" 
                                         name="car_no" 
-                                        placeholder="بۆ نموونە: 12345" 
+                                        placeholder="12345" 
                                         autocomplete="off" 
                                         required 
                                         autofocus
+                                        dir="ltr"
+                                        class="font-mono ltr-input"
                                     >
                                 </div>
                             </div>
@@ -212,7 +227,6 @@
                                 <label for="parizgaInput">
                                     <span class="required-star">*</span>
                                     پارێزگا
-                                    <span class="field-hint">(هەڵبژاردن یان نووسین)</span>
                                 </label>
                                 <div class="combobox-wrapper">
                                     <input 
@@ -220,7 +234,7 @@
                                         id="parizgaInput" 
                                         name="parizga" 
                                         list="parizgaList" 
-                                        placeholder="پارێزگا هەڵبژێرە یان بنووسە" 
+                                        placeholder="پارێزگا بنووسە یان هەڵبژێرە" 
                                         autocomplete="off"
                                         required
                                     >
@@ -307,7 +321,6 @@
                                 <label for="bashInput">
                                     <span class="required-star">*</span>
                                     بەش
-                                    <span class="field-hint">(هەڵبژاردن یان نووسین)</span>
                                 </label>
                                 <div class="combobox-wrapper">
                                     <input 
@@ -315,7 +328,7 @@
                                         id="bashInput" 
                                         name="bash" 
                                         list="bashList" 
-                                        placeholder="بەش هەڵبژێرە یان بنووسە" 
+                                        placeholder="بەش بنووسە یان هەڵبژێرە" 
                                         autocomplete="off"
                                         required
                                     >
@@ -338,57 +351,23 @@
                                 </div>
                             </div>
 
-                            <!-- ٤. بەروار -->
-                            <div class="form-field">
-                                <label for="regDateInput">
-                                    <span class="required-star">*</span>
-                                    بەرواری هاتن
-                                </label>
-                                <div class="input-icon-box">
-                                    <input type="text" id="regDateInput" name="reg_date" required readonly tabindex="-1" class="disabled-input">
-                                    <i class="fa-solid fa-calendar-day input-icon"></i>
+                            <!-- ٤. دوگمەکان لە هەمان ڕیز -->
+                            <div class="form-field form-actions-inline">
+                                <label class="action-label">&nbsp;</label>
+                                <div class="btn-group-row">
+                                    <button type="submit" id="submitBtn" class="btn-primary btn-action" title="تۆمارکردن (Enter)">
+                                        <i class="fa-solid fa-check-double"></i>
+                                        <span>تۆمارکردن</span>
+                                        <span class="spinner hidden" id="submitSpinner"></span>
+                                    </button>
+
+                                    <button type="button" id="clearBtn" class="btn-outline btn-action" title="بەتاڵکردنەوە (Esc)">
+                                        <i class="fa-solid fa-eraser"></i>
+                                        <span>بەتاڵکردنەوە</span>
+                                    </button>
                                 </div>
                             </div>
 
-                            <!-- ٥. کاتژمێر -->
-                            <div class="form-field">
-                                <label for="regTimeInput">
-                                    <span class="required-star">*</span>
-                                    کاتژمێر
-                                </label>
-                                <div class="input-icon-box">
-                                    <input type="text" id="regTimeInput" name="reg_time" placeholder="HH:mm:ss" required readonly tabindex="-1" dir="ltr" class="ltr-input font-mono disabled-input">
-                                    <i class="fa-solid fa-clock input-icon"></i>
-                                </div>
-                            </div>
-
-                            <!-- ٦. ناوی بەنزینخانە -->
-                            <div class="form-field">
-                                <label for="stationNameInput">
-                                    <span class="required-star">*</span>
-                                    ناوی بەنزینخانە
-                                </label>
-                                <div class="input-icon-box">
-                                    <input type="text" id="stationNameInput" name="station_name" placeholder="ناوی بەنزینخانە" required>
-                                    <i class="fa-solid fa-gas-pump input-icon"></i>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <!-- دوگمەکان -->
-                        <div class="form-actions">
-                            <button type="submit" id="submitBtn" class="btn-primary btn-lg">
-                                <i class="fa-solid fa-check-double"></i>
-                                <span>تۆمارکردن</span>
-                                <span class="spinner hidden" id="submitSpinner"></span>
-                            </button>
-
-
-                            <button type="button" id="clearBtn" class="btn-outline btn-lg" title="بەتاڵکردنەوە">
-                                <i class="fa-solid fa-eraser"></i>
-                                <span>بەتاڵکردنەوە</span>
-                            </button>
                         </div>
                     </form>
 
