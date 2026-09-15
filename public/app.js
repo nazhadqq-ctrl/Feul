@@ -255,6 +255,7 @@ function applyUserSession(user) {
 
     loadTodayRecords();
     resetFormToNormal();
+    clearInputs(true);
     setTimeout(() => carNumberInput.focus(), 250);
 }
 
@@ -357,24 +358,52 @@ function setupEventListeners() {
 
     // 5. Combobox Province preview update & auto check
     parizgaInput.addEventListener('input', () => {
-        platePreviewProvince.textContent = parizgaInput.value.trim() || 'هەولێر';
+        platePreviewProvince.textContent = parizgaInput.value.trim() || '-';
         lastCheckedSig = '';
         scheduleAutoCheck();
     });
     parizgaInput.addEventListener('change', () => {
+        platePreviewProvince.textContent = parizgaInput.value.trim() || '-';
         lastCheckedSig = '';
         scheduleAutoCheck();
     });
 
     // 6. Combobox Section preview update & auto check
     bashInput.addEventListener('input', () => {
-        platePreviewCategory.textContent = bashInput.value.trim() || 'تایبەت';
+        platePreviewCategory.textContent = bashInput.value.trim() || '-';
         lastCheckedSig = '';
         scheduleAutoCheck();
     });
     bashInput.addEventListener('change', () => {
+        platePreviewCategory.textContent = bashInput.value.trim() || '-';
         lastCheckedSig = '';
         scheduleAutoCheck();
+    });
+
+    // Auto-suggest dropdown when clicking or focusing empty comboboxes
+    [parizgaInput, bashInput].forEach(inp => {
+        if (!inp) return;
+        inp.addEventListener('focus', () => {
+            try { inp.showPicker(); } catch (e) {}
+        });
+        inp.addEventListener('click', () => {
+            try { inp.showPicker(); } catch (e) {}
+        });
+    });
+
+    // Make dropdown chevron icons clickable to open suggestion list
+    document.querySelectorAll('.combobox-wrapper').forEach(wrapper => {
+        const inp = wrapper.querySelector('input');
+        const arrow = wrapper.querySelector('.combo-arrow');
+        if (arrow && inp) {
+            arrow.style.cursor = 'pointer';
+            arrow.style.pointerEvents = 'auto';
+            arrow.addEventListener('click', (e) => {
+                e.stopPropagation();
+                inp.focus();
+                try { inp.showPicker(); } catch (err) {}
+            });
+        }
     });
 
     // 7. Form Submit (Check & Register Car)
@@ -434,6 +463,16 @@ async function handleRegisterCar() {
 
     if (!car_no) {
         carNumberInput.focus();
+        return;
+    }
+    if (!parizga) {
+        parizgaInput.focus();
+        try { parizgaInput.showPicker(); } catch (e) {}
+        return;
+    }
+    if (!bash) {
+        bashInput.focus();
+        try { bashInput.showPicker(); } catch (e) {}
         return;
     }
 
@@ -641,10 +680,10 @@ function clearInputs(clearAll = false) {
     lastCheckedSig = '';
 
     if (clearAll) {
-        parizgaInput.value = 'هەولێر';
-        platePreviewProvince.textContent = 'هەولێر';
-        bashInput.value = 'تایبەت';
-        platePreviewCategory.textContent = 'تایبەت';
+        parizgaInput.value = '';
+        platePreviewProvince.textContent = '-';
+        bashInput.value = '';
+        platePreviewCategory.textContent = '-';
     }
 }
 

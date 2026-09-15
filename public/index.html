@@ -165,9 +165,9 @@
                                 <span class="plate-kr">KR</span>
                             </div>
                             <div class="plate-center-info">
-                                <div class="plate-province-arabic" id="platePreviewProvince">هەولێر</div>
-                                <div class="plate-number-display" id="platePreviewNumber">12345 A</div>
-                                <div class="plate-category-badge" id="platePreviewCategory">تایبەت</div>
+                                <div class="plate-province-arabic" id="platePreviewProvince">-</div>
+                                <div class="plate-number-display" id="platePreviewNumber">12345</div>
+                                <div class="plate-category-badge" id="platePreviewCategory">-</div>
                             </div>
                         </div>
                     </div>
@@ -220,20 +220,83 @@
                                         id="parizgaInput" 
                                         name="parizga" 
                                         list="parizgaList" 
-                                        placeholder="پارێزگا هەڵبژێرە" 
-                                        value="هەولێر" 
+                                        placeholder="پارێزگا هەڵبژێرە یان بنووسە" 
+                                        autocomplete="off"
                                         required
                                     >
                                     <datalist id="parizgaList">
-                                        <option value="هەولێر">
-                                        <option value="سلێمانی">
+                                        <option value="الاردن تصدیر">
+                                        <option value="الانبار">
+                                        <option value="البصرة">
+                                        <option value="القادسية">
+                                        <option value="النجف">
+                                        <option value="انبار">
+                                        <option value="بابل">
+                                        <option value="بازگانی و پیشەسازی">
+                                        <option value="بصرة">
+                                        <option value="بغداد">
+                                        <option value="بێ ژمارە">
+                                        <option value="بێ سەرەتا">
+                                        <option value="بەرگری شارستانی">
+                                        <option value="بەرگری و شارستانی گەرمیان">
+                                        <option value="بەرگری و فریاکەوتن">
+                                        <option value="پۆلیسی دارستان">
+                                        <option value="تەندروستی">
+                                        <option value="پەروەردە">
+                                        <option value="پۆلیس">
+                                        <option value="پۆلیسی نەوت گاز">
+                                        <option value="خوێندنی باڵا">
+                                        <option value="داد">
+                                        <option value="دارایی">
+                                        <option value="دەزگای مین">
                                         <option value="دهۆک">
-                                        <option value="کەرکووک">
+                                        <option value="ديالى">
+                                        <option value="دیالى فحص مؤقت">
+                                        <option value="ژمارەى بیانی">
+                                        <option value="ڕۆشنبیری">
+                                        <option value="ڕێکخراوەکان">
+                                        <option value="ڕەگەزنامە">
+                                        <option value="زیقار">
+                                        <option value="سلێمانى">
+                                        <option value="شارەوانى و گەشت و گوزار">
+                                        <option value="صلاح الدین">
+                                        <option value="فحص مؤقت  مثنى">
+                                        <option value="فحص موقت البصرة">
+                                        <option value="فحص موقت النجف">
+                                        <option value="فحص موقت ديالى">
+                                        <option value="فحص موقت كركوك">
+                                        <option value="فحص موقت نينوى">
+                                        <option value="فحص مؤقت الانبار">
+                                        <option value="فحص مؤقت انبار">
+                                        <option value="فحص مؤقت بابل">
+                                        <option value="فحص مؤقت بغداد">
+                                        <option value="فحص مؤقت زیقار">
+                                        <option value="فحص مؤقت صلاح الدین">
+                                        <option value="فحص مؤقت قادسیة">
+                                        <option value="فحص مؤقت کربلاء">
+                                        <option value="فحص مؤقت میسان">
+                                        <option value="فحص مؤقت نینوى">
+                                        <option value="فحص مؤقت واسط">
+                                        <option value="كارەبا">
+                                        <option value="كربلاء">
+                                        <option value="كاتی دهۆک">
+                                        <option value="كاتی سلێمانى">
+                                        <option value="كاتی هەولێر">
+                                        <option value="كرکوک">
+                                        <option value="کشتوکاڵ">
+                                        <option value="كشتوکاڵ و سەرچاوەکانى ئاو">
+                                        <option value="گواستنەوە و گەیاندن">
+                                        <option value="مثنى">
+                                        <option value="میسان">
+                                        <option value="ناوخؤ">
+                                        <option value="نینوى">
+                                        <option value="هاتووچۆ">
                                         <option value="هەڵەبجە">
-                                        <option value="زاخۆ">
-                                        <option value="گەرمیان">
-                                        <option value="سۆران">
-                                        <option value="ڕاپەڕین">
+                                        <option value="ههولێر">
+                                        <option value="واست">
+                                        <option value="وەزارەتی پێشمەرگە">
+                                        <option value="ئاوەدان کردنەوە">
+                                        <option value="ئەوروپی">
                                     </datalist>
                                     <i class="fa-solid fa-chevron-down combo-arrow"></i>
                                 </div>
@@ -252,18 +315,24 @@
                                         id="bashInput" 
                                         name="bash" 
                                         list="bashList" 
-                                        placeholder="بەش هەڵبژێرە" 
-                                        value="تایبەت" 
+                                        placeholder="بەش هەڵبژێرە یان بنووسە" 
+                                        autocomplete="off"
                                         required
                                     >
                                     <datalist id="bashList">
                                         <option value="تایبەت">
-                                        <option value="کرێ">
                                         <option value="بار">
-                                        <option value="کشتوکاڵی">
+                                        <option value="بار-پاشگر">
+                                        <option value="بار-پاشگر2">
+                                        <option value="بار-پاشگر3">
                                         <option value="بیناسازی">
+                                        <option value="كرێ">
                                         <option value="ماتۆڕ">
-                                        <option value="حکومی">
+                                        <option value="میری">
+                                        <option value="جۆری تر">
+                                        <option value="ناوخۆ">
+                                        <option value="هاتووچۆ">
+                                        <option value="کشتوکاڵی">
                                     </datalist>
                                     <i class="fa-solid fa-chevron-down combo-arrow"></i>
                                 </div>
