@@ -182,27 +182,45 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: rgba(16, 185, 129, 0.12);
-    border: 1px solid rgba(16, 185, 129, 0.3);
-    color: #34d399;
-    font-size: 12px;
-    font-family: var(--font-mono);
-    padding: 4px 12px;
+    padding: 6px 14px;
     border-radius: 50px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.3s ease;
 }
 
-.status-dot {
-    width: 8px;
-    height: 8px;
+.db-status-pill.online {
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    color: #34d399;
+}
+
+.db-status-pill.online .status-dot {
     background-color: #10b981;
-    border-radius: 50%;
     box-shadow: 0 0 10px #10b981;
     animation: pulseDot 2s infinite;
+}
+
+.db-status-pill.offline {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.45);
+    color: #f87171;
+}
+
+.db-status-pill.offline .status-dot {
+    background-color: #ef4444;
+    box-shadow: 0 0 12px #ef4444;
+    animation: pulseDotFast 1s infinite;
 }
 
 @keyframes pulseDot {
     0%, 100% { opacity: 1; transform: scale(1); }
     50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+@keyframes pulseDotFast {
+    0%, 100% { opacity: 1; transform: scale(1.1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
 }
 
 .login-form {

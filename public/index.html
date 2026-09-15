@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="icon" type="image/x-icon" href="assets/app.ico">
-    <link rel="stylesheet" href="styles.css?v=2.3">
+    <link rel="stylesheet" href="styles.css?v=2.4">
 </head>
 <body>
 
@@ -28,9 +28,9 @@
                     </div>
                     <h1>سیستەمی بەنزینخانە</h1>
                     <p class="subtitle">تۆمارکردن و بەڕێوەبردنی پێدانی سووتەمەنی</p>
-                    <div class="db-status-pill">
-                        <span class="status-dot"></span>
-                        <span>SQL Server: 62.201.232.190 (Feul)</span>
+                    <div id="dbStatusPill" class="db-status-pill online">
+                        <span id="dbStatusDot" class="status-dot"></span>
+                        <span id="dbStatusText">سیستەم پەیوەستە بە سێرڤەرەوە</span>
                     </div>
                 </div>
 
@@ -435,6 +435,6 @@
         </main>
     </div>
 
-    <script src="app.js?v=2.3"></script>
+    <script src="app.js?v=2.4"></script>
 </body>
 </html>

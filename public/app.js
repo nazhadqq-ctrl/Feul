@@ -265,14 +265,44 @@ function enableEnglishCarNumberTyping(inputElem) {
 }
 
 // ===================================================================
-// INITIALIZATION
+// INITIALIZATION & CONNECTION HEALTH MONITOR
 // ===================================================================
 document.addEventListener('DOMContentLoaded', () => {
     initClock();
+    checkServerHealth();
+    setInterval(checkServerHealth, 10000); // Check server connection every 10s
     loadPlacesList();
     checkSavedSession();
     setupEventListeners();
 });
+
+// Live Server Connection & Internet Health Check
+async function checkServerHealth() {
+    const pill = document.getElementById('dbStatusPill');
+    const text = document.getElementById('dbStatusText');
+    if (!pill || !text) return;
+
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
+        const res = await fetch('/api/health', { signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+            const data = await res.json();
+            if (data.status === 'ok') {
+                pill.className = 'db-status-pill online';
+                text.textContent = 'سیستەم پەیوەستە بە سێرڤەرەوە';
+                return;
+            }
+        }
+        pill.className = 'db-status-pill offline';
+        text.textContent = 'کێشە هەیە لە ئینتەرنێت یان سێرڤەر';
+    } catch (e) {
+        pill.className = 'db-status-pill offline';
+        text.textContent = 'کێشە هەیە لە ئینتەرنێت یان سێرڤەر';
+    }
+}
 
 // Load distinct places from server to datalist
 async function loadPlacesList() {
