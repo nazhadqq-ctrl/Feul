@@ -337,8 +337,18 @@ function setupEventListeners() {
         showLogin();
     });
 
+    // Helper to safely open datalist picker on supported browsers
+    function openPickerSafely(inp) {
+        if (!inp) return;
+        try {
+            if (typeof inp.showPicker === 'function') {
+                inp.showPicker();
+            }
+        } catch (e) {}
+    }
+
     // 4. Car Plate Input: auto-convert Kurdish numbers, allow Kurdish & English text freely
-    carNumberInput.addEventListener('input', (e) => {
+    carNumberInput.addEventListener('input', () => {
         const raw = carNumberInput.value;
         const normalized = normalizeKurdishDigits(raw);
         if (raw !== normalized) {
@@ -351,43 +361,76 @@ function setupEventListeners() {
             clearTimeout(clearTimer);
             resetFormToNormal();
         }
-        scheduleAutoCheck();
     });
-    carNumberInput.addEventListener('change', scheduleAutoCheck);
-    carNumberInput.addEventListener('blur', scheduleAutoCheck);
 
-    // 5. Combobox Province preview update & auto check
+    // Enter / Tab on Car Number -> Jump to Province (Parizga)
+    carNumberInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === 'Tab') {
+            e.preventDefault();
+            const val = normalizeKurdishDigits(carNumberInput.value).trim();
+            if (val) {
+                parizgaInput.focus();
+                openPickerSafely(parizgaInput);
+            }
+        }
+    });
+
+    // 5. Combobox Province: both typing & selecting supported
     parizgaInput.addEventListener('input', () => {
         platePreviewProvince.textContent = parizgaInput.value.trim() || '-';
-        lastCheckedSig = '';
-        scheduleAutoCheck();
     });
+
+    // When Province is picked from list -> Jump to Section (Bash)
     parizgaInput.addEventListener('change', () => {
         platePreviewProvince.textContent = parizgaInput.value.trim() || '-';
-        lastCheckedSig = '';
-        scheduleAutoCheck();
+        if (parizgaInput.value.trim()) {
+            bashInput.focus();
+            openPickerSafely(bashInput);
+        }
     });
 
-    // 6. Combobox Section preview update & auto check
+    // Enter / Tab on Province -> Jump to Section (Bash)
+    parizgaInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === 'Tab') {
+            e.preventDefault();
+            if (parizgaInput.value.trim()) {
+                bashInput.focus();
+                openPickerSafely(bashInput);
+            } else {
+                openPickerSafely(parizgaInput);
+            }
+        }
+    });
+
+    // 6. Combobox Section (Bash): both typing & selecting supported
     bashInput.addEventListener('input', () => {
         platePreviewCategory.textContent = bashInput.value.trim() || '-';
-        lastCheckedSig = '';
-        scheduleAutoCheck();
-    });
-    bashInput.addEventListener('change', () => {
-        platePreviewCategory.textContent = bashInput.value.trim() || '-';
-        lastCheckedSig = '';
-        scheduleAutoCheck();
     });
 
-    // Auto-suggest dropdown when clicking or focusing empty comboboxes
+    // When Section is picked from list and all 3 are filled -> Check & Register!
+    bashInput.addEventListener('change', () => {
+        platePreviewCategory.textContent = bashInput.value.trim() || '-';
+        const car = normalizeKurdishDigits(carNumberInput.value).trim();
+        const par = parizgaInput.value.trim();
+        const bsh = bashInput.value.trim();
+        if (car && par && bsh) {
+            handleRegisterCar();
+        }
+    });
+
+    // Enter / Tab on Section -> Trigger Check & Register!
+    bashInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === 'Tab') {
+            e.preventDefault();
+            handleRegisterCar();
+        }
+    });
+
+    // Click on combobox inputs to open suggestions
     [parizgaInput, bashInput].forEach(inp => {
         if (!inp) return;
-        inp.addEventListener('focus', () => {
-            try { inp.showPicker(); } catch (e) {}
-        });
         inp.addEventListener('click', () => {
-            try { inp.showPicker(); } catch (e) {}
+            openPickerSafely(inp);
         });
     });
 
@@ -401,7 +444,7 @@ function setupEventListeners() {
             arrow.addEventListener('click', (e) => {
                 e.stopPropagation();
                 inp.focus();
-                try { inp.showPicker(); } catch (err) {}
+                openPickerSafely(inp);
             });
         }
     });
@@ -514,72 +557,6 @@ async function handleRegisterCar() {
 }
 
 // -------------------------------------------------------------
-// REALTIME AUTOMATIC CHECK EVENT (ژمارەی ئۆتۆمبێل + پارێزگا + بەش)
-// -------------------------------------------------------------
-let autoCheckTimer = null;
-let lastCheckedSig = '';
-
-function scheduleAutoCheck() {
-    clearTimeout(autoCheckTimer);
-    autoCheckTimer = setTimeout(runAutoCheck, 350);
-}
-
-async function runAutoCheck() {
-    const car_no = normalizeKurdishDigits(carNumberInput.value).trim().toUpperCase();
-    const parizga = parizgaInput.value.trim();
-    const bash = bashInput.value.trim();
-    const reg_date = regDateInput.value;
-
-    // Trigger only when all 3 fields are filled in
-    if (!car_no || !parizga || !bash) {
-        return;
-    }
-
-    const currentSig = `${car_no}:::${parizga}:::${bash}`;
-    if (currentSig === lastCheckedSig) {
-        return;
-    }
-
-    try {
-        const response = await fetch('/api/check-car', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ car_no, parizga, bash, reg_date })
-        });
-
-        const data = await response.json();
-        lastCheckedSig = currentSig;
-
-        if (data.allowed) {
-            triggerAllowedNotice(data.message, car_no, parizga, bash);
-        } else {
-            triggerBlockedState(data);
-        }
-    } catch (err) {
-        console.error('Auto check error:', err);
-    }
-}
-
-function triggerAllowedNotice(message, car_no, parizga, bash) {
-    if (registrationCard.classList.contains('state-blocked')) return;
-
-    registrationCard.className = 'glass-panel registration-card state-success';
-    stateBadgeIcon.className = 'fa-solid fa-circle-check';
-    quickStatusText.textContent = `ڕێگەپێدراوە بۆ بەشی ${bash}`;
-
-    actionBanner.className = 'action-banner success';
-    actionBanner.classList.remove('hidden');
-    bannerIcon.className = 'fa-solid fa-circle-check';
-    bannerTitle.textContent = `ڕێگەپێدراوە: ئۆتۆمبێلی (${car_no}) بۆ بەشی (${bash})`;
-    bannerMessage.textContent = `ئەم ئۆتۆمبێلە لە بەشی (${bash}) لەم ٧ ڕۆژەدا بەنزینی وەرنەگرتووە و دەتوانرێت تۆمار بکرێت.`;
-    bannerMeta.innerHTML = `
-        <span class="meta-pill"><i class="fa-solid fa-location-dot"></i> پارێزگا: ${parizga}</span>
-        <span class="meta-pill"><i class="fa-solid fa-layer-group"></i> بەش: ${bash}</span>
-        <span class="meta-pill" style="background: rgba(16, 185, 129, 0.3);"><i class="fa-solid fa-bolt"></i> ئامادەیە بۆ خەزنکردن (Enter)</span>
-    `;
-}
-
-// -------------------------------------------------------------
 // UI STATES: BLOCKED (RED) & SUCCESS (GREEN)
 // -------------------------------------------------------------
 
@@ -590,7 +567,6 @@ function triggerAllowedNotice(message, car_no, parizga, bash) {
  * 1. Form card glows RED with alert animation.
  * 2. Sound buzzer triggers.
  * 3. Detailed warning banner appears with previous date, time, station, and remaining days.
- * 4. Automatic form clearing ready for next car ("تۆمارهكه بهتال ببێتهوه بۆ تۆماری نوێ ئهكتیڤ ببیتهوه").
  */
 function triggerBlockedState(data) {
     // 1. Play Warning Sound (Buzzer)
@@ -618,14 +594,13 @@ function triggerBlockedState(data) {
         <span class="meta-pill" style="background: rgba(239, 68, 68, 0.4);"><i class="fa-solid fa-hourglass-half"></i> ${data.daysRemaining || '٧'} ڕۆژ ماوە (${data.nextAllowedDate || ''})</span>
     `;
 
-    // 4. Automatic clearing ("و تۆمارهكه بهتال ببێتهوه بۆ تۆماری نوێ ئهكتیڤ ببیتهوه")
-    // Keep warning visible for 3.5 seconds, but clear input immediately and keep focus on car number
-    clearInputs(false); // clears car_no input so operator can type immediately
+    // Highlight and focus car number so operator can easily see or re-type
+    carNumberInput.select();
     carNumberInput.focus();
 
     clearTimer = setTimeout(() => {
         resetFormToNormal();
-    }, 4500);
+    }, 5000);
 }
 
 /**
