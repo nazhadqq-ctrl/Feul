@@ -472,6 +472,8 @@ async function handleRegisterCar() {
         submitBtn.disabled = false;
         submitSpinner.classList.add('hidden');
     }
+}
+
 // -------------------------------------------------------------
 // REALTIME AUTOMATIC CHECK EVENT (ژمارەی ئۆتۆمبێل + پارێزگا + بەش)
 // -------------------------------------------------------------
